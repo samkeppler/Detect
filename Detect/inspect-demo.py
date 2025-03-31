@@ -76,12 +76,13 @@ def main():
     #Data exploration section
     #############################################
     #TODO automatically detect tracts
-    tract_list = ['AF_left', 'AF_right','ATR_left','ATR_right', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG_left', 'CG_right', 
-                  'CST_left', 'CST_right', 'FX_left', 'FX_right', 'IFO_left', 'IFO_right', 'ILF_left', 'ILF_right', 'OR_left', 'OR_right', 'SLF_I_left',
-                  'SLF_II_left', 'SLF_III_left', 'SLF_I_right', 'SLF_II_right', 'SLF_III_right', 'UF_left', 'UF_right']
+    tract_list = ['AF_left', 'AF_right','ATR_left','ATR_right', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG_left', 'CG_right', 
+                  'CST_left', 'CST_right', 'FPT_left', 'FPT_right', 'IFO_left', 'IFO_right', 'ILF_left', 'ILF_right', 'OR_left', 'OR_right', 
+                  'POPT_left', 'POPT_right', 'SLF_I_left','SLF_II_left', 'SLF_III_left', 'SLF_I_right', 'SLF_II_right', 'SLF_III_right', 
+                  'UF_left', 'UF_right']
     
-    tract_list_uni = ['AF', 'ATR', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
-                  'CST', 'FX', 'IFO', 'ILF', 'OR', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
+    tract_list_uni = ['AF', 'ATR', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
+                  'CST', 'FPT', 'IFO', 'ILF', 'OR', 'POPT', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
     
     if st.checkbox('Show tract profiles'):
         plot_controls = st.checkbox('Plot Controls', True)
