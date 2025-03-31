@@ -74,8 +74,8 @@ def main():
     #Data exploration section
     #############################################
     #TODO automatically detect tracts
-    tract_list = ['AF', 'ATR', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
-                  'CST', 'FX', 'IFO', 'ILF', 'OR', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
+    tract_list = ['AF', 'ATR', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
+                  'CST', 'FPT', 'IFO', 'ILF', 'OR', 'POPT', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
     
     if st.checkbox('Show tract profiles'):
         plot_controls = st.checkbox('Plot Controls', True)
