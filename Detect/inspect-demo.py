@@ -154,10 +154,11 @@ def main():
             if once:
                 finalpval = dfpval
                 finalvector = dfvector
-                
-            finalpval.append(dfpval)
-            finalvector.append(dfvector)   
+            else:
+                finalpval = pd.concat([finalpval, dfpval])
+                finalvector = pd.concat([finalvector, dfvector])
             once = False
+
         
         name = 'tests/p-val'+'_'+metric+'_'+title+'.csv'
         st.markdown(reporter.get_csv_link(finalpval,name), unsafe_allow_html=True)
