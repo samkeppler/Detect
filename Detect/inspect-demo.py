@@ -121,16 +121,16 @@ def main():
     if st.sidebar.checkbox('Regress confound?',True):
         regress = not regress
         
-    #input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, input_threshold)
+    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, input_threshold)
     st.write("Using the following tracts: ", ", ".join(tract_profile))
     
     LOOCV = False
-    #if st.sidebar.checkbox('Run all subjects?',False):
-        #LOOCV = not LOOCV
+    if st.sidebar.checkbox('Run all subjects?',False):
+        LOOCV = not LOOCV
     
     pop = [subject]
-    #if LOOCV:
-        #pop = subjs_ids
+    if LOOCV:
+        pop = subjs_ids
         
     #Analysis section
     #############################################
