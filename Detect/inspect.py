@@ -130,7 +130,7 @@ def main():
     if st.sidebar.checkbox('Regress confound?',True):
         regress = not regress
         
-    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, input_threshold)
+    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, 1.0)
     st.write("Using the following tracts: ", ", ".join(tract_profile))
     
     LOOCV = False
