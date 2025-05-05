@@ -43,20 +43,16 @@ See the paper [here](https://www.nature.com/articles/s43588-021-00126-8).
 """
 
 def main():
-    parser = argparse.ArgumentParser(description="Anomaly detection.",
-                                     epilog="Written by Maxime Chamberland.")
-    parser.add_argument("--i", metavar="data_path", dest="data_file",
-                        help="tract profiles (.xlsx)", required=True, 
-                        type=abspath)
-    parser.add_argument("--demog", metavar="demog_path", dest="demog_file",
-                        help="file containing demographics (.csv)", required=True, 
-                        type=abspath)
-    args = parser.parse_args()
+    st.sidebar.subheader("File Uploader")
+    up_demog = st.sidebar.file_uploader("Upload demographics (.csv)", type="csv")
+    up_data = st.sidebar.file_uploader("Upload tract profiles (.xlsx)", type="xlsx")
 
-    #Load datasheets
-    #############################################
-    df_demog = loader.load_csv(args.demog_file)
-    datasheet = loader.load_data(args.data_file)
+    if not up_demog or not up_data:
+        st.warning("Please upload both the demographics and data files to continue.")
+        return
+
+    df_demog = pd.read_csv(up_demog)
+    datasheet = loader.load_data(up_data)
 
     st.sidebar.subheader("File Uploader")
     up_demog = st.sidebar.file_uploader("Upload demographics", type="csv")
