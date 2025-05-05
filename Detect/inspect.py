@@ -21,6 +21,17 @@ abs_file_path = join(script_dir, rel_path)
 image = Image.open(abs_file_path)
 st.image(image,use_column_width=True)
 
+# Model selector in sidebar
+model_type = st.sidebar.selectbox("Select anomaly detection model", ["AutoEncoder", "PCA", "ZScore"])
+
+# Dynamically import the selected model
+if model_type == "AutoEncoder":
+    from autoencoder import AutoEncoderModel as Model
+elif model_type == "PCA":
+    from PCA import PCAModel as Model
+elif model_type == "ZScore":
+    from Zscore import ZScoreModel as Model
+
 """
 # Inspect 
 A deep learning based anomaly detection framework for diffusion MRI Tractometry.
