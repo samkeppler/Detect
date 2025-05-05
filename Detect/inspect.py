@@ -158,8 +158,9 @@ def main():
             cur_group = df_demog.loc[df_data['ID'] == s, 'Group']
             st.write("Current subject: ", s, "Group: ", cur_group.iloc[0])
             if(cur_group.iloc[0] != 0):
-                x, x_hat, mae, p_along, p_overall, p_div = inspector.run(s, df_data, df_demog, regress, tract_profile, hemi, metric)
-                
+                x, x_hat, mae, p_along, p_overall, p_div = inspector.run(
+                    s, df_data, df_demog, regress, tract_profile, hemi, metric, model_type=model_type
+                )
                 #Report section
                 #############################################
                 st.header("3. Report section")

@@ -30,13 +30,29 @@ def getSubject(HC, y_HC, X, subject, original, insert=False):
     
     return X_train_split, y_train_split, X_test_split, y_test_split
 
-def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
+def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='AutoEncoder'):
+
+    # Dynamically select the anomaly detection model
+    if model_type == "AutoEncoder":
+        from autoencoder import AutoEncoderModel as Model
+    elif model_type == "PCA":
+        from PCA import PCAModel as Model
+    elif model_type == "ZScore":
+        from Zscore import ZScoreModel as Model
+    else:
+        raise ValueError(f"Unsupported model type: {model_type}")
+
+    model = Model()  # TODO: Adjust this if your model requires arguments
+
     st.warning("Computing permutations ... estimated time: " + str(np.round(len(df_demog)*2/60,2)) + " minutes.")
+    
     #1 Select features
     X = df_data.loc[:, df_data.columns.str.startswith('Group') | 
-                df_data.columns.str.startswith('ID') |
-                df_data.columns.str.contains('|'.join(tracts))]
+                    df_data.columns.str.startswith('ID') |
+                    df_data.columns.str.contains('|'.join(tracts))]
     
+    ...
+  
     #Separate HC from PATIENTS
     HC = X[X['Group'] == 0]
     y_HC = HC[['Group', 'ID']]
