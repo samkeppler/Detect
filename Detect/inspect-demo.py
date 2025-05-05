@@ -43,6 +43,8 @@ def main():
     datasheet = loader.load_data(features)
 
     st.sidebar.subheader("File Uploader")
+    model_type = st.sidebar.selectbox("Select anomaly detection model", ["AutoEncoder", "PCA", "ZScore"])
+
     up_demog = st.sidebar.file_uploader("Upload demographics", type="csv")
     if up_demog:
         df_demog = pd.read_csv(up_demog)
@@ -121,7 +123,7 @@ def main():
     if st.sidebar.checkbox('Regress confound?',True):
         regress = not regress
         
-    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, input_threshold)
+    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, 1.0)
     st.write("Using the following tracts: ", ", ".join(tract_profile))
     
     LOOCV = False
@@ -138,7 +140,6 @@ def main():
     finalpval = pd.DataFrame()
     finalvector = pd.DataFrame()
     if st.sidebar.button("Run"):
-        
         once = True
         for s in pop:
             x, x_hat, mae, p_along, p_overall, p_div = inspector.run(s, df_data, df_demog, regress, tract_profile, hemi, metric)
