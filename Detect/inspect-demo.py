@@ -34,13 +34,23 @@ See the paper [here](https://www.nature.com/articles/s43588-021-00126-8).
 def main():
     #Load datasheets
     #############################################
+    model_type = st.sidebar.selectbox("Select anomaly detection model", ["AutoEncoder", "PCA", "ZScore"])
+
     rel_path = "../ressources/demog-short.csv"
     demog = join(script_dir, rel_path)
-    df_demog = loader.load_csv(demog)
-    
+    try:
+        df_demog = loader.load_csv(demog)
+    except Exception as e:
+        st.error(f"Could not load default demographics: {e}")
+        return
+
     rel_path = "../ressources/features-short.xlsx"
     features = join(script_dir, rel_path)
-    datasheet = loader.load_data(features)
+    try:
+        datasheet = loader.load_data(features)
+    except Exception as e:
+        st.error(f"Could not load default feature data: {e}")
+        return
 
     st.sidebar.subheader("File Uploader")
     model_type = st.sidebar.selectbox("Select anomaly detection model", ["AutoEncoder", "PCA", "ZScore"])
@@ -141,9 +151,13 @@ def main():
     finalvector = pd.DataFrame()
     if st.sidebar.button("Run"):
         once = True
-        for s in pop:
-            x, x_hat, mae, p_along, p_overall, p_div = inspector.run(s, df_data, df_demog, regress, tract_profile, hemi, metric)
-            cur_group = df_demog.loc[df_data['ID'] == s, 'Group']
+        if st.sidebar.button("Run Analysis"):
+            for s in pop:
+                x, x_hat, mae, p_along, p_overall, p_div = inspector.run(
+                    s, df_data, df_demog, regress, tract_profile, hemi, metric, model_type=model_type
+                )
+                cur_group = df_demog.loc[df_data['ID'] == s, 'Group']
+
             #Report section
             #############################################
             st.header("3. Report section")
