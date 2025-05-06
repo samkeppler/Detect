@@ -3,7 +3,7 @@ import pandas as pd
 from os.path import join, dirname
 from PIL import Image
 from utils import loader
-import inspector as inspector
+from utils import inspector as inspector
 
 def main():
     script_dir = dirname(__file__)
