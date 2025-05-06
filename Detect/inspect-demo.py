@@ -4,6 +4,7 @@ from os.path import join, dirname
 from PIL import Image
 from utils import loader
 from utils import inspector as inspector
+import numpy as np
 
 def main():
     script_dir = dirname(__file__)
