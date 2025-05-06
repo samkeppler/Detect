@@ -51,7 +51,7 @@ def main():
         st.write("Global Anomaly Score:", global_score)
 
         st.subheader("Tract-Level Anomalies")
-        st.write(pd.DataFrame(bin_vector.reshape(1, -1), columns=x.columns))
+        st.write(pd.DataFrame(np.array(bin_vector).reshape(1, -1), columns=x.columns))
 
 if __name__ == "__main__":
     main()
