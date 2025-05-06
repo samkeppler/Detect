@@ -269,7 +269,12 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
         st.error("Division by zero: p_div is 0. Check if any tracts or subjects were selected.")
         return None, None  # or return dummy values depending on your function
 
-    safe_threshold = max(0.01, 1 / p_div) if p_div != 0 else float('inf')
+    if not isinstance(p_div, (int, float)) or p_div == 0:
+        st.error("Invalid or zero p_div — cannot compute statistical threshold.")
+        return None, None
+
+    safe_threshold = max(0.01, 1 / p_div)
+
     if p_overall < safe_threshold:
         st.success("p < "+str(np.round(1/p_div,3)))
     else:
