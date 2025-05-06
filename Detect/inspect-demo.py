@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from os.path import join, dirname, abspath
 import seaborn as sns
-
-from utils import loader, explorer, inspector, reporter
+import utils.loader as loader
+import utils.explorer as explorer
+import utils.inspector as inspector
+import utils.reporter as reporter
 
 # Top banner
 script_dir = dirname(__file__)
