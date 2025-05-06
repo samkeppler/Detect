@@ -53,15 +53,34 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         model = Model(X_train, X_test, "Autoencoder")
         x_hat = model.run_once()
 
-        # Ensure X_test is a DataFrame with columns
+        # Ensure x_hat is a DataFrame
+        x_hat = pd.DataFrame(x_hat)
+
+        # Ensure X_test is also a DataFrame with aligned columns/index
         X_test = pd.DataFrame(X_test, columns=x_hat.columns, index=x_hat.index)
 
-        x_hat = pd.DataFrame(x_hat, columns=X_test.columns, index=X_test.index)
-
+        # Compute MAE per subject and anomaly score
         mae = np.mean(np.abs(X_test - x_hat), axis=1)
         sub_diff = x_hat - X_test
         bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int).iloc[0]
         global_score = np.mean(mae)
+
+        # Ensure return value 'x' in inspect-demo.py has .columns
+        X_test_df = pd.DataFrame(X_test, columns=x_hat.columns, index=x_hat.index)
+
+        # Save CSVs
+        os.makedirs("tests", exist_ok=True)
+
+        dfpval = pd.DataFrame([[subject, y_test['Group'].iloc[0], global_score]],
+                          columns=['ID', 'Group', 'p-val'])
+        dfpval.to_csv(f"tests/p-val_{metric}_{title}.csv", index=False)
+
+        dfvector = pd.DataFrame([bin_vector], columns=X_test.columns)
+        dfvector['ID'] = subject
+        dfvector['Group'] = y_test['Group'].iloc[0]
+        dfvector.to_csv(f"tests/reconstructed-features_{metric}_{title}.csv", index=False)
+
+        return X_test_df, x_hat, bin_vector, global_score, subject, y_test
 
     elif model_type == "PCA":
         model = Model(n_components=2)
