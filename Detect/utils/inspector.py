@@ -1,28 +1,3 @@
-
-import numpy as np
-import pandas as pd
-import streamlit as st
-from models import model_prep
-from utils.reporter import write_pval
-
-def getSubject(HC, y_HC, X, subject, original, insert=False):
-    X_train = HC.loc[HC['ID'] != subject]
-    y_train = y_HC.loc[y_HC['ID'] != subject]
-
-    if insert:
-        X_train = pd.concat([X_train, X.loc[X['ID'] == original]])
-        y_train = pd.concat([y_train, X_train[['Group', 'ID']]])
-
-    X_test = X.loc[X['ID'] == subject]
-    y_test = X_test[['Group', 'ID']]
-
-    return (
-        X_train.drop(['Group', 'ID'], axis=1),
-        y_train,
-        X_test.drop(['Group', 'ID'], axis=1),
-        y_test
-    )
-
 def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEncoder'):
     if model_type == "AutoEncoder":
         from models.autoencoder import AutoEncoderModel as Model
@@ -65,10 +40,12 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         model.fit(X_train)
         scores = model.transform(X_test)
         bin_vector = (scores > np.percentile(scores, 95)).astype(int)
-        return X_test, None, bin_vector, np.mean(scores), subject, y_test
+        # Return DataFrame version of X_test so x.columns works in inspect-demo
+        return pd.DataFrame(X_test, columns=X_train.columns), None, bin_vector, np.mean(scores), subject, y_test
 
     elif model_type == "ZScore":
         model = Model()
         _, z_test = model.run(X_train, X_test)
         bin_vector = (np.abs(z_test) > 2).astype(int)
-        return X_test, None, bin_vector, np.mean(z_test), subject, y_test
+        # Same here: return X_test as a DataFrame
+        return pd.DataFrame(X_test, columns=X_train.columns), None, bin_vector, np.mean(z_test), subject, y_test
