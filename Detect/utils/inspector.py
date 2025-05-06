@@ -82,7 +82,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
 
         #6 Run 
-        model = Model(X_train, X_test, "Autoencoder")
+        model = Model(X_train, X_test, "Z-score")
         k_hat = model.run_once()
         #unnormalize
         k_hat_inv = scaler.inverse_transform(k_hat)
