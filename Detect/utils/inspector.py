@@ -33,11 +33,11 @@ def getSubject(HC, y_HC, X, subject, original, insert=False):
 def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='AutoEncoder'):
     # Dynamically select the anomaly detection model
     if model_type == "AutoEncoder":
-        from autoencoder import AutoEncoderModel as Model
+        from models.autoencoder import AutoEncoderModel as Model
     elif model_type == "PCA":
-        from pca import PCAModel as Model
+        from models.pca import PCAModel as Model
     elif model_type == "ZScore":
-        from zscore import ZScoreModel as Model
+        from models.zscore import ZScoreModel as Model
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
 
