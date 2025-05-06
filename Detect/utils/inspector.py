@@ -36,11 +36,12 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
     if model_type == "AutoEncoder":
         from autoencoder import AutoEncoderModel as Model
     elif model_type == "PCA":
-        from PCA import PCAModel as Model
+        from pca import PCAModel as Model
     elif model_type == "ZScore":
-        from Zscore import ZScoreModel as Model
+        from zscore import ZScoreModel as Model
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
+
 
     model = Model()  # TODO: Adjust this if your model requires arguments
 
