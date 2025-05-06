@@ -13,7 +13,6 @@ from os.path import join, dirname, abspath
 import seaborn as sns
 
 from utils import loader, explorer, reporter, inspector
-import inspector as inspector
 
 #Top banner
 script_dir = dirname(__file__) #<-- absolute dir the script is in
