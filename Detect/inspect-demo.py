@@ -85,7 +85,7 @@ def main():
     tract_list_uni = ['AF', 'ATR', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG','CST', 
                       'FPT', 'IFO', 'ILF', 'POPT',  'OR', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
     
-   if st.checkbox('Show tract profiles'):
+    if st.checkbox('Show tract profiles'):
         plot_controls = st.checkbox('Plot Controls', True)
         plot_patients = st.checkbox('Plot Patients', True)
         show_indiv = st.checkbox('Show Individuals', False)
