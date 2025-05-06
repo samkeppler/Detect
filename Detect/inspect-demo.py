@@ -173,7 +173,10 @@ def main():
             st.warning("Final p-values not available — skipping CSV export.")
 
         name = f'tests/reconstructed-features_{metric}_{title}.csv'
-        st.markdown(reporter.get_csv_link_to_xhat(finalvector, name), unsafe_allow_html=True)
+        if finalvector is not None:
+            st.markdown(reporter.get_csv_link_to_xhat(finalvector, name), unsafe_allow_html=True)
+        else:
+            st.warning("Feature reconstruction data not available — skipping CSV export.")
 
 if __name__ == '__main__':
     main()
