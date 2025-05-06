@@ -38,8 +38,13 @@ class Model:
         
     def run_once(self):
         if self.modeltype == "Z-score":
-            _, z_scores = self.model.run(self.x_train, self.x_test)
+            model = zscore.ZScoreModel()
+            _, z_scores = model.run(self.x_train, self.x_test)
             return np.abs(z_scores) > 2  # Binary anomalies
+        elif self.modeltype == "PCA":
+            return PCA.run_once(self)
+        else:
+            raise ValueError("Unsupported model type: " + self.modeltype)
         elif self.modeltype == "PCA":
             return PCA.run_once(self)
         else:
