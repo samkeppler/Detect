@@ -11,7 +11,7 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-from models import zscore, pca, autoencoder
+from models import zscore, pca
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -29,15 +29,21 @@ class Model:
         return self.x_test
     
     def run(self):
-        if(self.modeltype == "Z-score"):
-            return Zscore.run(self)
-        elif(self.modeltype == "PCA"):
+        if self.modeltype == "Z-score":
+            return zscore.run(self)
+        elif self.modeltype == "PCA":
             return PCA.run(self)
         else:
-            return autoencoder.run(self) 
+            raise ValueError("Unsupported model type: " + self.modeltype) 
         
     def run_once(self):
-        return autoencoder.run_once(self)
+        if self.modeltype == "Z-score":
+            _, z_scores = self.model.run(self.x_train, self.x_test)
+            return np.abs(z_scores) > 2  # Binary anomalies
+        elif self.modeltype == "PCA":
+            return PCA.run_once(self)
+        else:
+            raise ValueError("Unsupported model type: " + self.modeltype)
 
 def plotDistribution(d_train, xlim, ylim, label, method):
     with _lock:    
