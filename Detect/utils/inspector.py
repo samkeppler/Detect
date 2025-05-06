@@ -46,7 +46,7 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
 
     _, X_train, X_test = model_prep.normalize_features(X_train, X_test, "void")
 
-    if regress and 'age' in df_demog.columns and 'sex' in df_demog.columns:
+    if regress == True:
         X_train, X_test = model_prep.regress_confound(X_train, X_test, df_demog)
 
     if model_type == "AutoEncoder":
@@ -59,7 +59,7 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         # Compute MAE and binary anomaly vector
         mae = np.mean(np.abs(X_test - x_hat), axis=1)
         sub_diff = x_hat - X_test
-        bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int).iloc[0]
+        bin_vector = (np.abs(sub_diff.iloc[0]) > np.mean(mae)).astype(int)
         global_score = np.mean(mae)
 
         # Save CSVs
