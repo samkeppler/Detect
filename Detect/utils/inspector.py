@@ -55,7 +55,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
 
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
-    model = Model(X_train, X_test, "Autoencoder")
+    model = Model(X_train, X_test, "Z-score")
     x_hat = model.run_once()
     
     #unnormalize
