@@ -60,9 +60,10 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     
     #unnormalize
     x_hat_inv = x_hat  # No inverse_transform for Z-score model
-    x_inv = scaler.inverse_transform(X_test)
-    mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
-    sub_orig = x_hat_inv - x_inv
+    x_inv = None
+    mae = np.abs(x_hat_inv)  # use absolute z-score as "error"
+    sub_orig = x_hat_inv  # for plotting
+
     #To accumulate error Distances
     p = np.zeros(len(sub_orig[0]))
     #Then, swap patient with HC, save in a vector a new K.
