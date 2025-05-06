@@ -265,6 +265,10 @@ def filterSpurious(p_along):
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
     st.success("Mean Absolute Error (MAE, unscaled): " + str(np.round(np.mean(mae), 3)))
 
+    if p_div == 0:
+    st.error("Division by zero: p_div is 0. Check if any tracts or subjects were selected.")
+    return None, None  # or return dummy values depending on your function
+
     if (p_overall < max(0.01, (1/p_div))):
         st.success("p < "+str(np.round(1/p_div,3)))
     else:
