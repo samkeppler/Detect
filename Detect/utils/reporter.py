@@ -3,7 +3,7 @@ from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 import warnings
 
-from Detect.models import pca, zscore
+from models import pca, zscore
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
