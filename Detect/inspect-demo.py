@@ -36,7 +36,7 @@ def main():
 
     if st.sidebar.button("Run Analysis"):
         x, x_hat, bin_vector, global_score, sid, y_test = inspector.run(
-            subject, df_data, df_demog, regress, selected_tracts, metric, model_type
+            subject, df_data, df_demog, regress, selected_tracts, metric, model_type, title
         )
 
         if x is None:

@@ -1,4 +1,28 @@
-def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEncoder'):
+import numpy as np
+import pandas as pd
+import streamlit as st
+from models import model_prep
+import os
+
+def getSubject(HC, y_HC, X, subject, original, insert=False):
+    X_train = HC.loc[HC['ID'] != subject]
+    y_train = y_HC.loc[y_HC['ID'] != subject]
+
+    if insert:
+        X_train = pd.concat([X_train, X.loc[X['ID'] == original]])
+        y_train = pd.concat([y_train, X_train[['Group', 'ID']]])
+
+    X_test = X.loc[X['ID'] == subject]
+    y_test = X_test[['Group', 'ID']]
+
+    return (
+        X_train.drop(['Group', 'ID'], axis=1),
+        y_train,
+        X_test.drop(['Group', 'ID'], axis=1),
+        y_test
+    )
+
+def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEncoder', title='MY_ANALYSIS'):
     if model_type == "AutoEncoder":
         from models.autoencoder import AutoEncoderModel as Model
     elif model_type == "PCA":
@@ -20,7 +44,6 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         st.error("No data for analysis — check tract selection.")
         return None, None, None, None, None, None
 
-    # Normalize
     _, X_train, X_test = model_prep.normalize_features(X_train, X_test, "void")
 
     if regress and 'age' in df_demog.columns and 'sex' in df_demog.columns:
@@ -29,23 +52,39 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
     if model_type == "AutoEncoder":
         model = Model(X_train, X_test, "Autoencoder")
         x_hat = model.run_once()
+        x_hat = pd.DataFrame(x_hat, columns=X_test.columns, index=X_test.index)
         mae = np.mean(np.abs(X_test - x_hat), axis=1)
         sub_diff = x_hat - X_test
         bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int).iloc[0]
         global_score = np.mean(mae)
-        return X_test, x_hat, bin_vector, global_score, subject, y_test
 
     elif model_type == "PCA":
         model = Model(n_components=2)
         model.fit(X_train)
         scores = model.transform(X_test)
         bin_vector = (scores > np.percentile(scores, 95)).astype(int)
-        # Return DataFrame version of X_test so x.columns works in inspect-demo
-        return pd.DataFrame(X_test, columns=X_train.columns), None, bin_vector, np.mean(scores), subject, y_test
+        global_score = np.mean(scores)
+        X_test = pd.DataFrame(X_test, columns=X_train.columns)
+        x_hat = None
 
     elif model_type == "ZScore":
         model = Model()
         _, z_test = model.run(X_train, X_test)
         bin_vector = (np.abs(z_test) > 2).astype(int)
-        # Same here: return X_test as a DataFrame
-        return pd.DataFrame(X_test, columns=X_train.columns), None, bin_vector, np.mean(z_test), subject, y_test
+        global_score = np.mean(z_test)
+        X_test = pd.DataFrame(X_test, columns=X_train.columns)
+        x_hat = None
+
+    # CSV Export
+    os.makedirs("tests", exist_ok=True)
+
+    dfpval = pd.DataFrame([[subject, y_test['Group'].iloc[0], global_score]],
+                          columns=['ID', 'Group', 'p-val'])
+    dfpval.to_csv(f"tests/p-val_{metric}_{title}.csv", index=False)
+
+    dfvector = pd.DataFrame([bin_vector], columns=X_test.columns)
+    dfvector['ID'] = subject
+    dfvector['Group'] = y_test['Group'].iloc[0]
+    dfvector.to_csv(f"tests/reconstructed-features_{metric}_{title}.csv", index=False)
+
+    return X_test, x_hat, bin_vector, global_score, subject, y_test
