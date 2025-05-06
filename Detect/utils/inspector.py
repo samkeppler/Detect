@@ -11,7 +11,6 @@ from sklearn import preprocessing
 from models import autoencoder, model_prep
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from models.model_prep import Model
-from utils import reporter
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 def getSubject(HC, y_HC, X, subject, original, insert=False):
