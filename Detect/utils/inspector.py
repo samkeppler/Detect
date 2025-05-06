@@ -39,7 +39,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
 
-    st.warning("Computing permutations ... estimated time: " + str(np.round(len(df_demog)*2/60, 2)) + " minutes.")
+    st.warning("Computing permutations ... estimated time: " + str(np.round(len(df_demog) * 2 / 60, 2)) + " minutes.")
 
     # 1. Select features
     X = df_data.loc[:, df_data.columns.str.startswith('Group') |
@@ -51,6 +51,10 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
     y_HC = HC[['Group', 'ID']]
     X_train, y_train, X_test, y_test = getSubject(HC, y_HC, X, subject, False)
 
+    if X_train.empty or X_test.empty:
+        st.error("Training or test data is empty — check tract selection.")
+        return None, None, None, None, None, 0
+
     # 3. Normalize
     scaler, X_train, X_test = model_prep.normalize_features(X_train, X_test, "void")
 
@@ -61,7 +65,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
         else:
             st.error("No age or sex information found. Skipping regression step.")
 
-    # 5. Model initialization and execution
+    # 5. Model-specific logic
     if model_type == "ZScore":
         model = Model()
         z_train, z_test = model.run(X_train, X_test)
@@ -70,8 +74,8 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
     elif model_type == "PCA":
         model = Model(n_components=2)
         model.fit(X_train)
-        X_test_transformed = model.transform(X_test)
-        return X_test_transformed, None, None, None, None, None
+        transformed = model.transform(X_test)
+        return transformed, None, None, None, None, None
 
     elif model_type == "AutoEncoder":
         model = Model(X_train, X_test, "Autoencoder")
@@ -87,33 +91,34 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
 
         for s in y_HC['ID'].values:
             st.write("Computing permutations (LOOCV) with", s)
-            X_train, y_train, X_test, y_test = getSubject(HC, y_HC, X, s, subject, True)
-            scaler, X_train, X_test = model_prep.normalize_features(X_train, X_test, "void")
+            X_train_perm, y_train_perm, X_test_perm, y_test_perm = getSubject(HC, y_HC, X, s, subject, True)
+            scaler, X_train_perm, X_test_perm = model_prep.normalize_features(X_train_perm, X_test_perm, "void")
 
             if regress:
                 if 'sex' in df_demog and 'age' in df_demog:
-                    X_train, X_test = model_prep.regress_confound(X_train, X_test, df_demog)
+                    X_train_perm, X_test_perm = model_prep.regress_confound(X_train_perm, X_test_perm, df_demog)
 
-            model = Model(X_train, X_test, "Autoencoder")
-            k_hat = model.run_once()
+            model_perm = Model(X_train_perm, X_test_perm, "Autoencoder")
+            k_hat = model_perm.run_once()
 
             k_hat_inv = scaler.inverse_transform(k_hat)
-            k_inv = scaler.inverse_transform(X_test)
+            k_inv = scaler.inverse_transform(X_test_perm)
             k_mae = np.mean(np.abs(k_hat_inv - k_inv), axis=1)
             sub = k_hat_inv - k_inv
 
             for e in range(len(sub_orig[0])):
-                if sub_orig[0][e] > 0:
-                    if sub[0][e] >= sub_orig[0][e]:
-                        p[e] += 1
-                else:
-                    if sub[0][e] < sub_orig[0][e]:
-                        p[e] += 1
+                if sub_orig[0][e] > 0 and sub[0][e] >= sub_orig[0][e]:
+                    p[e] += 1
+                elif sub_orig[0][e] <= 0 and sub[0][e] < sub_orig[0][e]:
+                    p[e] += 1
 
             if np.mean(k_mae) > np.mean(mae):
                 count += 1
 
         p_div = len(X_train) + len(X_test)
+        if p_div == 0:
+            return x_inv, x_hat_inv, mae, None, None, 0
+
         overall_p = count / p_div
         p_crit = p / p_div
         p_along = np.zeros(len(p_crit))
@@ -124,3 +129,4 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
                 p_along[i] = 1
 
         return x_inv, x_hat_inv, mae, p_along, overall_p, p_div
+
