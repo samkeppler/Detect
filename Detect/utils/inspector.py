@@ -52,7 +52,13 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
     if model_type == "AutoEncoder":
         model = Model(X_train, X_test, "Autoencoder")
         x_hat = model.run_once()
+
+        # Ensure X_test is a DataFrame with columns
+        if not isinstance(X_test, pd.DataFrame):
+            X_test = pd.DataFrame(X_test)
+
         x_hat = pd.DataFrame(x_hat, columns=X_test.columns, index=X_test.index)
+
         mae = np.mean(np.abs(X_test - x_hat), axis=1)
         sub_diff = x_hat - X_test
         bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int).iloc[0]
