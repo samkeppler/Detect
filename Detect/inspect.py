@@ -21,17 +21,6 @@ abs_file_path = join(script_dir, rel_path)
 image = Image.open(abs_file_path)
 st.image(image,use_column_width=True)
 
-# Model selector in sidebar
-model_type = st.sidebar.selectbox("Select anomaly detection model", ["AutoEncoder", "PCA", "ZScore"])
-
-# Dynamically import the selected model
-if model_type == "AutoEncoder":
-    from autoencoder import AutoEncoderModel as Model
-elif model_type == "PCA":
-    from PCA import PCAModel as Model
-elif model_type == "ZScore":
-    from Zscore import ZScoreModel as Model
-
 """
 # Inspect 
 A deep learning based anomaly detection framework for diffusion MRI Tractometry.
@@ -43,16 +32,20 @@ See the paper [here](https://www.nature.com/articles/s43588-021-00126-8).
 """
 
 def main():
-    st.sidebar.subheader("File Uploader")
-    up_demog = st.sidebar.file_uploader("Upload demographics (.csv)", type="csv")
-    up_data = st.sidebar.file_uploader("Upload tract profiles (.xlsx)", type="xlsx")
+    parser = argparse.ArgumentParser(description="Anomaly detection.",
+                                     epilog="Written by Maxime Chamberland.")
+    parser.add_argument("--i", metavar="data_path", dest="data_file",
+                        help="tract profiles (.xlsx)", required=True, 
+                        type=abspath)
+    parser.add_argument("--demog", metavar="demog_path", dest="demog_file",
+                        help="file containing demographics (.csv)", required=True, 
+                        type=abspath)
+    args = parser.parse_args()
 
-    if not up_demog or not up_data:
-        st.warning("Please upload both the demographics and data files to continue.")
-        return
-
-    df_demog = pd.read_csv(up_demog)
-    datasheet = loader.load_data(up_data)
+    #Load datasheets
+    #############################################
+    df_demog = loader.load_csv(args.demog_file)
+    datasheet = loader.load_data(args.data_file)
 
     st.sidebar.subheader("File Uploader")
     up_demog = st.sidebar.file_uploader("Upload demographics", type="csv")
@@ -88,13 +81,12 @@ def main():
     #Data exploration section
     #############################################
     #TODO automatically detect tracts
-    tract_list = ['AF_left', 'AF_right','ATR_left','ATR_right', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG_left', 'CG_right', 
-                  'CST_left', 'CST_right', 'FPT_left', 'FPT_right', 'IFO_left', 'IFO_right', 'ILF_left', 'ILF_right', 'OR_left', 'OR_right', 
-                  'POPT_left', 'POPT_right', 'SLF_I_left','SLF_II_left', 'SLF_III_left', 'SLF_I_right', 'SLF_II_right', 'SLF_III_right', 
-                  'UF_left', 'UF_right']
+    tract_list = ['AF_left', 'AF_right','ATR_left','ATR_right', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG_left', 'CG_right', 
+                  'CST_left', 'CST_right', 'FX_left', 'FX_right', 'IFO_left', 'IFO_right', 'ILF_left', 'ILF_right', 'OR_left', 'OR_right', 'SLF_I_left',
+                  'SLF_II_left', 'SLF_III_left', 'SLF_I_right', 'SLF_II_right', 'SLF_III_right', 'UF_left', 'UF_right']
     
-    tract_list_uni = ['AF', 'ATR', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
-                  'CST', 'FPT', 'IFO', 'ILF', 'OR', 'POPT', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
+    tract_list_uni = ['AF', 'ATR', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
+                  'CST', 'FX', 'IFO', 'ILF', 'OR', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
     
     if st.checkbox('Show tract profiles'):
         plot_controls = st.checkbox('Plot Controls', True)
@@ -130,7 +122,7 @@ def main():
     if st.sidebar.checkbox('Regress confound?',True):
         regress = not regress
         
-    input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, 1.0)
+    #input_threshold = st.sidebar.number_input("Anomaly threshold", 0.0, 10.0, input_threshold)
     st.write("Using the following tracts: ", ", ".join(tract_profile))
     
     LOOCV = False
@@ -154,9 +146,8 @@ def main():
             cur_group = df_demog.loc[df_data['ID'] == s, 'Group']
             st.write("Current subject: ", s, "Group: ", cur_group.iloc[0])
             if(cur_group.iloc[0] != 0):
-                x, x_hat, mae, p_along, p_overall, p_div = inspector.run(
-                    s, df_data, df_demog, regress, tract_profile, hemi, metric, model_type=model_type
-                )
+                x, x_hat, mae, p_along, p_overall, p_div = inspector.run(s, df_data, df_demog, regress, tract_profile, hemi, metric)
+                
                 #Report section
                 #############################################
                 st.header("3. Report section")

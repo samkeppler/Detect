@@ -2,9 +2,6 @@ from __future__ import division, print_function, absolute_import
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 import warnings
-
-
-
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
@@ -15,7 +12,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import autoencoder
+from models import Zscore, PCA, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -221,9 +218,9 @@ def final_report(AUC, WW, fpr, tpr, method, metric, group, title):
     
 def save(result, method):
     if method == "Z-score":
-        zscore.save(result)
+        Zscore.save(result)
     elif method == "PCA":
-        pca.save(result)
+        PCA.save(result)
     else:
         autoencoder.save(result)
         
@@ -265,17 +262,7 @@ def filterSpurious(p_along):
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
     st.success("Mean Absolute Error (MAE, unscaled): " + str(np.round(np.mean(mae), 3)))
 
-    if p_div == 0:
-        st.error("Division by zero: p_div is 0. Check if any tracts or subjects were selected.")
-        return None, None  # or return dummy values depending on your function
-
-    if not isinstance(p_div, (int, float)) or p_div == 0:
-        st.error("Invalid or zero p_div — cannot compute statistical threshold.")
-        return None, None
-
-    safe_threshold = max(0.01, 1 / p_div)
-
-    if p_overall < safe_threshold:
+    if (p_overall < max(0.01, (1/p_div))):
         st.success("p < "+str(np.round(1/p_div,3)))
     else:
         st.error("p = "+str(p_overall))

@@ -26,21 +26,26 @@ st.image(image,use_column_width=True)
 A deep learning based anomaly detection framework for diffusion MRI Tractometry.
 
 Author: Maxime Chamberland ([chamberm.github.io](https://chamberm.github.io)).
-See the paper [here](https://www.nature.com/articles/s43588-021-00126-8). 
+See the paper [here](https://www.nature.com/articles/s43588-021-00126-8).
 
 ----
 """
 
 def main():
-    #LOAD data
-    rel_path = "../ressources/demogA.csv"
-    demog = join(script_dir, rel_path)
-    df_demog = loader.load_csv(demog)
-    
-    rel_path = "../ressources/featuresA.xlsx"
-    features = join(script_dir, rel_path)
-    datasheet = loader.load_data(features)
-    ################################
+    parser = argparse.ArgumentParser(description="Anomaly detection.",
+                                     epilog="Written by Maxime Chamberland.")
+    parser.add_argument("--i", metavar="data_path", dest="data_file",
+                        help="tract profiles (.xlsx)", required=True, 
+                        type=abspath)
+    parser.add_argument("--demog", metavar="demog_path", dest="demog_file",
+                        help="file containing demographics (.csv)", required=True, 
+                        type=abspath)
+    args = parser.parse_args()
+
+    #Load datasheets
+    #############################################
+    df_demog = loader.load_csv(args.demog_file)
+    datasheet = loader.load_data(args.data_file)
 
     st.sidebar.subheader("File Uploader")
     up_demog = st.sidebar.file_uploader("Upload demographics", type="csv")
@@ -74,8 +79,8 @@ def main():
     #Data exploration section
     #############################################
     #TODO automatically detect tracts
-    tract_list = ['AF', 'ATR', 'CA', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
-                  'CST', 'FX', 'IFO', 'ILF', 'OR', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
+    tract_list = ['AF', 'ATR', 'CC_1', 'CC_2', 'CC_3', 'CC_4', 'CC_5', 'CC_6', 'CC_7', 'CG',
+                  'CST', 'FPT', 'IFO', 'ILF', 'OR', 'POPT', 'SLF_I', 'SLF_II', 'SLF_III', 'UF', 'All']
     
     if st.checkbox('Show tract profiles'):
         plot_controls = st.checkbox('Plot Controls', True)
@@ -97,8 +102,8 @@ def main():
     #Anomaly detection section
     #############################################
     st.header("2. Analysis section")
-    options = ("Z-score", "PCA", "AutoEncoder")
-    method = st.sidebar.radio("Method", options, 2)
+    options = ("Z-score", "PCA", "AutoEncoder")#, "SVM")
+    method = st.sidebar.radio("Method", options, 0)
     
     hemi = "Both"
     
