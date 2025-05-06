@@ -31,8 +31,8 @@ class Model:
     def run(self):
         if self.modeltype == "Z-score":
             return zscore.run(self)
-        elif self.modeltype == "PCA":
-            return PCA.run(self)
+        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
+            return pca.run(self)
         else:
             raise ValueError("Unsupported model type: " + self.modeltype) 
         
@@ -41,12 +41,12 @@ class Model:
             model = zscore.ZScoreModel()
             _, z_scores = model.run(self.x_train, self.x_test)
             return np.abs(z_scores) > 2  # Binary anomalies
-        elif self.modeltype == "PCA":
-            return PCA.run_once(self)
+        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
+            return pca.run_once(self)
         else:
             raise ValueError("Unsupported model type: " + self.modeltype)
-        elif self.modeltype == "PCA":
-            return PCA.run_once(self)
+        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
+            return pca.run_once(self)
         else:
             raise ValueError("Unsupported model type: " + self.modeltype)
 
