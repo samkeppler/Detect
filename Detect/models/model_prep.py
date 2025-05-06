@@ -1,7 +1,7 @@
 from __future__ import division, print_function, absolute_import
 import warnings
 
-from Detect.models import pca, zscore
+from models import pca, zscore
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
