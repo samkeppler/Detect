@@ -28,11 +28,12 @@ def main():
 
     subject = st.sidebar.selectbox("Subject", df_demog.ID)
 
-    tract_list = [col.split("_")[0] for col in df_data.columns if "_" in col and col.split("_")[0] in df_data.columns]
-    tract_list = sorted(set(tract_list))
+    tract_list = sorted(set(col.split("_")[0] for col in df_data.columns if "_" in col))
     selected_tracts = st.sidebar.multiselect("Select Tracts", tract_list, default=tract_list)
 
-    regress = st.sidebar.checkbox("Regress Age/Sex", value=True)
+    regress = st.sidebar.checkbox("Regress Confounds", value=True)
+
+    title = st.sidebar.text_input("Savename", "MY_ANALYSIS")
 
     if st.sidebar.button("Run Analysis"):
         x, x_hat, bin_vector, global_score, sid, y_test = inspector.run(
