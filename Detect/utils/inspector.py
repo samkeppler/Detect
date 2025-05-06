@@ -54,8 +54,7 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         x_hat = model.run_once()
 
         # Ensure X_test is a DataFrame with columns
-        if not isinstance(X_test, pd.DataFrame):
-            X_test = pd.DataFrame(X_test)
+        X_test = pd.DataFrame(X_test, columns=x_hat.columns, index=x_hat.index)
 
         x_hat = pd.DataFrame(x_hat, columns=X_test.columns, index=X_test.index)
 
