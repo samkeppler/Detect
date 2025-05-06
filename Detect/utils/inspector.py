@@ -56,7 +56,7 @@ def run(subject, df_data, df_demog, regress, tracts, metric, model_type='AutoEnc
         x_hat = model.run_once()
         mae = np.mean(np.abs(X_test - x_hat), axis=1)
         sub_diff = x_hat - X_test
-        bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int)[0]
+        bin_vector = (np.abs(sub_diff) > np.mean(mae)).astype(int).iloc[0]
         global_score = np.mean(mae)
         return X_test, x_hat, bin_vector, global_score, subject, y_test
 
