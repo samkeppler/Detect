@@ -45,11 +45,6 @@ class Model:
             return pca.run_once(self)
         else:
             raise ValueError("Unsupported model type: " + self.modeltype)
-        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
-            return pca.run_once(self)
-        else:
-            raise ValueError("Unsupported model type: " + self.modeltype)
-
 def plotDistribution(d_train, xlim, ylim, label, method):
     with _lock:    
         fig, ax = plt.subplots(figsize=(12, 8))
