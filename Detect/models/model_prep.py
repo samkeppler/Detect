@@ -1,5 +1,7 @@
 from __future__ import division, print_function, absolute_import
 import warnings
+
+from Detect.models import pca, zscore
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
@@ -11,7 +13,7 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-from models import Zscore, PCA, autoencoder
+from models import autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -30,9 +32,9 @@ class Model:
     
     def run(self):
         if(self.modeltype == "Z-score"):
-            return Zscore.run(self)
+            return zscore.run(self)
         elif(self.modeltype == "PCA"):
-            return PCA.run(self)
+            return pca.run(self)
         else:
             return autoencoder.run(self) 
         

@@ -8,7 +8,8 @@ import seaborn as sns
 import random
 from sklearn.model_selection import RepeatedKFold, train_test_split, cross_val_score, StratifiedKFold, RepeatedStratifiedKFold, GridSearchCV
 from sklearn import svm, preprocessing
-from models import PCA, autoencoder, model_prep
+from Detect.models import pca
+from models import autoencoder, model_prep
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler
 from models.model_prep import Model
 from utils import reporter

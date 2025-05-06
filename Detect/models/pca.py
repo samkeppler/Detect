@@ -83,4 +83,17 @@ def run(model):
     M_train = np.squeeze(pd.DataFrame(data=Mob_train, index=X_train.index))
 
     return M_train, M_test
+
+from sklearn.decomposition import PCA
+
+class PCAModel:
+    def __init__(self, n_components=2):
+        self.pca = PCA(n_components=n_components)
+
+    def fit(self, X_train):
+        self.pca.fit(X_train)
+
+    def transform(self, X):
+        return self.pca.transform(X)
+
     

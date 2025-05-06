@@ -13,8 +13,6 @@ from sklearn.preprocessing import  StandardScaler, MinMaxScaler
 from models.model_prep import Model
 from utils import reporter
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
-from zscore import ZScoreModel as Model
-from pca import PCAModel as Model
 
 def getSubject(HC, y_HC, X, subject, original, insert=False):
     X_train_split = HC.loc[HC['ID'] != subject]
@@ -33,7 +31,6 @@ def getSubject(HC, y_HC, X, subject, original, insert=False):
     return X_train_split, y_train_split, X_test_split, y_test_split
 
 def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='AutoEncoder'):
-
     # Dynamically select the anomaly detection model
     if model_type == "AutoEncoder":
         from autoencoder import AutoEncoderModel as Model
@@ -44,8 +41,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric, model_type='A
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
 
-
-    model = Model()  # TODO: Adjust this if your model requires arguments
+    model = Model()
 
     st.warning("Computing permutations ... estimated time: " + str(np.round(len(df_demog)*2/60,2)) + " minutes.")
     

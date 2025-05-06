@@ -2,6 +2,8 @@ from __future__ import division, print_function, absolute_import
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 import warnings
+
+from Detect.models import pca, zscore
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
@@ -12,7 +14,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import Zscore, PCA, autoencoder
+from models import autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -218,9 +220,9 @@ def final_report(AUC, WW, fpr, tpr, method, metric, group, title):
     
 def save(result, method):
     if method == "Z-score":
-        Zscore.save(result)
+        zscore.save(result)
     elif method == "PCA":
-        PCA.save(result)
+        pca.save(result)
     else:
         autoencoder.save(result)
         
