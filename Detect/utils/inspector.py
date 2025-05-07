@@ -98,7 +98,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
             if sub_orig[e] > 0:
                 if sub[e] >= sub_orig[e]:
                     p[e] += 1
-             else:
+            else:
                 if sub[e] < sub_orig[e]:
                     p[e] += 1
                     
