@@ -80,7 +80,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         model = Model(X_train, X_test, "PCAModel")
         k_hat = model.run_once()
         #unnormalize
-        k_hat_inv = scaler.inverse_transform(k_hat)
+        k_hat_inv = np.zeros_like(X_test)  # placeholder reconstruction
         k_inv = scaler.inverse_transform(X_test)
         k_mae = np.mean(np.abs(k_hat_inv-k_inv), axis = 1)
         sub = k_hat_inv - k_inv
