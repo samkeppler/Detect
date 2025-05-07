@@ -63,7 +63,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     sub_orig = x_hat_inv  # for permutation comparison
 
     #To accumulate error Distances
-    p = np.zeros(len(sub_orig[0]))
+    p = np.zeros(len(sub_orig))
     #Then, swap patient with HC, save in a vector a new K.
     #repeat for all HC, save in a matrix.
     count = 0
