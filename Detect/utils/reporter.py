@@ -12,7 +12,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import Zscore, PCA, autoencoder
+from models import zscore, pca, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -218,9 +218,9 @@ def final_report(AUC, WW, fpr, tpr, method, metric, group, title):
     
 def save(result, method):
     if method == "Z-score":
-        Zscore.save(result)
+        zscore.save(result)
     elif method == "PCA":
-        PCA.save(result)
+        pca.save(result)
     else:
         autoencoder.save(result)
         
