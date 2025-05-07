@@ -8,7 +8,7 @@ import os
 
 
 def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_path):
-    # Convert everything to 1D arrays safely
+    # Safely flatten all inputs to 1D for plotting
     original_line = np.ravel(X_original)
     reconstructed_line = np.ravel(X_reconstructed)
     anomaly_mask = np.ravel(binary_mask)
@@ -32,6 +32,7 @@ def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_
 
 def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, threshold=2.0, subject_id=None):
     subject_id = subject_id or "unknown"
+
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
@@ -54,7 +55,6 @@ def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, thresh
             subject_id=subject_id,
             save_path=out_path
         )
-
 
     else:
         raise ValueError("Only 'pca' model is supported in this version.")
