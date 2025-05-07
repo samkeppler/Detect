@@ -284,6 +284,8 @@ def filterSpurious(p_along):
     
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
     fig, ax = plt.subplots(1, 1, figsize=(24, 8))
+    st.write("DEBUG: type(x_hat) BEFORE write_pval =", type(x_hat))
+    st.write("DEBUG: repr(x_hat) BEFORE write_pval =", repr(x_hat))
 
     # Plot original subject profile
     ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2, zorder=2)
