@@ -112,5 +112,13 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         if p_crit[i] <= max_p:
             p_along[i] = 1
                 
+    if hasattr(x_hat_inv, 'values'):
+        st.write("x_hat_inv is a DataFrame")
+    elif isinstance(x_hat_inv, np.ndarray):
+        st.write("x_hat_inv is ndarray")
+    else:
+        st.write("x_hat_inv type:", type(x_hat_inv))
+        st.write("x_hat_inv repr:", repr(x_hat_inv))
+            
     #K could be Zscore.
     return x_inv, x_hat_inv, mae, p_along, overall_p, p_div
