@@ -309,7 +309,13 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
     ax.axhline(0, color='gray', linewidth=1, linestyle='--', alpha=0.5)
 
     # Formatting
-    ax.set_xlim((0, len(x_hat)))
+    # If x_hat is a DataFrame or 1D array, get number of features
+    if isinstance(x_hat, pd.DataFrame):
+        n_features = x_hat.shape[1]
+    else:
+        n_features = len(x_hat)
+
+    ax.set_xlim((0, n_features))
     ymin = x.iloc[0].min()
     ymax = x.iloc[0].max()
     yrange = ymax - ymin
