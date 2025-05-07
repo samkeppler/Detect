@@ -154,8 +154,8 @@ def main():
                 finalpval = dfpval
                 finalvector = dfvector
                 
-            finalpval.append(dfpval)
-            finalvector.append(dfvector)   
+            finalpval = pd.concat([finalpval, dfpval], ignore_index=True)
+            finalvector = pd.concat([finalvector, dfvector], ignore_index=True)
             once = False
         
         name = 'tests/p-val'+'_'+metric+'_'+title+'.csv'
