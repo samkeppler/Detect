@@ -84,11 +84,10 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         #6 Run 
         model = Model(X_train, X_test, "Z-score")
         k_hat = model.run_once()
-        #unnormalize
-        k_hat_inv = scaler.inverse_transform(k_hat)
-        k_inv = scaler.inverse_transform(X_test)
-        k_mae = np.mean(np.abs(k_hat_inv-k_inv), axis = 1)
-        sub = k_hat_inv - k_inv
+        k_hat_inv = k_hat  # no inverse_transform for Z-score output
+        k_inv = None
+        k_mae = np.abs(k_hat)  # use z-score magnitude as error
+        sub = k_hat  # for plotting
         for e in range(len(sub_orig[0])):
             #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
                 #p[e] = p[e] + 1
