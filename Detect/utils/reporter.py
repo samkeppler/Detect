@@ -235,6 +235,10 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     x_hat =  np.insert(x_hat, 0, 0, axis=1)
     x_hat =  np.insert(x_hat, 0, 0, axis=1)
 
+    # Ensure p_along matches number of columns
+    if len(p_along) < len(cols):
+        p_along = np.pad(p_along, (0, len(cols) - len(p_along)), 'constant')
+
     dfvector = pd.DataFrame([p_along], index=[0], columns=cols) #replace with [p_along] for binary results
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
