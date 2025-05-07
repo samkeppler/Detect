@@ -108,3 +108,8 @@ class PCAModel:
         # For PCA + Mahalanobis, inverse transform isn't meaningful.
         # We'll return zeros so MAE = |score| works in inspector.
         return np.zeros_like(X_scores)
+    
+    def run_once(model_instance):
+        model = PCAModel()
+        model.fit(model_instance.X_train)
+        return model.transform(model_instance.X_test)
