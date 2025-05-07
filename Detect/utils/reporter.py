@@ -258,8 +258,22 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     feature_cols = [c for c in cols if c not in ('ID', 'Group')]
 
     # Flatten and threshold to binary
-    x_hat_binary = (np.abs(x_hat_numeric).flatten() > 3).astype(int)
-    recon = pd.DataFrame(x_hat_binary.reshape(1, -1), columns=feature_cols)
+    # Threshold to binary
+    x_hat_binary = (np.abs(x_hat_numeric) > 3).astype(int)
+
+    # Make sure it's a 1D array of the same length as feature_cols
+    x_hat_binary = x_hat_binary.flatten()
+
+    # Safety check
+    if len(x_hat_binary) != len(feature_cols):
+        st.write("DEBUG: mismatch in binary shape and feature names")
+        st.write("x_hat_binary length:", len(x_hat_binary))
+        st.write("feature_cols length:", len(feature_cols))
+        raise ValueError("x_hat_binary length does not match number of feature columns")
+
+    # Now safely convert to a 1-row DataFrame
+    recon = pd.DataFrame([x_hat_binary], columns=feature_cols)
+
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
     recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
