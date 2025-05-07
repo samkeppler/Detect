@@ -8,6 +8,10 @@ import os
 
 
 def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_path):
+    X_original = np.atleast_2d(X_original)
+    X_reconstructed = np.atleast_2d(X_reconstructed)
+    binary_mask = np.atleast_2d(binary_mask)
+
     plt.figure(figsize=(12, 4))
     x_vals = np.arange(X_original.shape[1])
     plt.plot(x_vals, X_original[0], label="Original", color="orangered")
