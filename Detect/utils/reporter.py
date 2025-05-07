@@ -279,9 +279,6 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
         fig, ax = plt.subplots(1,1,figsize=(24, 8))
         ax.legend(fontsize=14, loc='upper right')
 
-        if x_hat.shape[1] == x.shape[1]:
-            ax.plot(x_hat[0], color='#6a1596', label='Reconstructed', linewidth=4, linestyle="dashed", alpha=0.8)
-
         ax.plot(x[0], color='xkcd:burnt orange', label='Original', linewidth=4)
 
         p_along_binary = filterSpurious(p_along)
