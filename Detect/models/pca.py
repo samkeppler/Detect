@@ -22,27 +22,21 @@ def covar_matrix(data, verbose=False):
         print("Error: Covariance Matrix is not positive definite!")
 
 def MahalanobisDist(inv_cov_matrix, mean_distr, data, verbose=False):
-    inv_covariance_matrix = inv_cov_matrix
-    vars_mean = mean_distr
-    diff = data - vars_mean
+    diff = data - mean_distr
     md = np.zeros(len(diff))
     for i in range(len(diff)):
-        md[i] = np.sqrt(diff[i].dot(inv_covariance_matrix).dot(diff[i]))
+        md[i] = np.sqrt(diff[i].dot(inv_cov_matrix).dot(diff[i]))
     return md
 
 def MD_detectOutliers(dist, extreme=False, verbose=False):
     k = 3. if extreme else 2.
     threshold = np.mean(dist) * k
-    outliers = []
-    for i in range(len(dist)):
-        if dist[i] >= threshold:
-            outliers.append(i)
+    outliers = [i for i, d in enumerate(dist) if d >= threshold]
     return np.array(outliers)
 
 def MD_threshold(dist, extreme=False, verbose=False):
     k = 3. if extreme else 2.
-    threshold = np.mean(dist) * k
-    return threshold
+    return np.mean(dist) * k
 
 def is_pos_def(A):
     if np.allclose(A, A.T):
@@ -51,8 +45,7 @@ def is_pos_def(A):
             return True
         except np.linalg.LinAlgError:
             return False
-    else:
-        return False
+    return False
 
 def run(model):
     X_train = model.get_train()
@@ -64,22 +57,17 @@ def run(model):
 
     st.write("Explained variance:", pca.explained_variance_ratio_)
 
-    X_train_PCA = pd.DataFrame(X_train_PCA)
-    X_train_PCA.index = X_train.index
-    data_train = X_train_PCA.values
-
-    X_test_PCA = pd.DataFrame(X_test_PCA)
-    X_test_PCA.index = X_test.index
-    data_test = X_test_PCA.values
+    data_train = X_train_PCA
+    data_test = X_test_PCA
 
     cov_matrix, inv_cov_matrix = covar_matrix(data_train)
     mean_distr = np.mean(data_train, axis=0)
 
-    Mob_test = MahalanobisDist(inv_cov_matrix, mean_distr, data_test, verbose=False)
-    M_test = np.squeeze(pd.DataFrame(data=Mob_test, index=X_test.index))
+    Mob_test = MahalanobisDist(inv_cov_matrix, mean_distr, data_test)
+    M_test = np.squeeze(Mob_test)
 
-    Mob_train = MahalanobisDist(inv_cov_matrix, mean_distr, data_train, verbose=False)
-    M_train = np.squeeze(pd.DataFrame(data=Mob_train, index=X_train.index))
+    Mob_train = MahalanobisDist(inv_cov_matrix, mean_distr, data_train)
+    M_train = np.squeeze(Mob_train)
 
     return M_train, M_test
 
@@ -110,3 +98,7 @@ class PCAModel:
         self.train_scores = M_train
         self.test_scores = M_test
         return np.array(M_test)
+
+    def inverse_transform(self, X):
+        # Not used with Mahalanobis-based PCA anomaly detection
+        return X
