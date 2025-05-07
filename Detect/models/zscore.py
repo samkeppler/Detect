@@ -16,23 +16,12 @@ def run(model):
     meanProfile = np.mean(X_train)
     stdProfile = np.std(X_train)
 
-    zscoreTrain = np.mean((X_train - meanProfile)/stdProfile, axis=1)
-    zscoreTest = np.mean((X_test - meanProfile)/stdProfile, axis=1)
-
+    zscoreTrain = np.mean((X_train - meanProfile)/stdProfile, axis =1)
+    zscoreTest = np.mean((X_test - meanProfile)/stdProfile, axis =1)
+    
+    #MAE_train = np.mean((X_train - meanProfile), axis =1)
+    #MAE_test = np.mean((X_test - meanProfile), axis =1)
+    
     return zscoreTrain, zscoreTest
-
-class ZScoreModel:
-    def __init__(self):
-        self.mean = None
-        self.std = None
-
-    def fit(self, X_train):
-        self.mean = np.mean(X_train, axis=0)
-        self.std = np.std(X_train, axis=0)
-
-    def run(self, X_train, X_test):
-        if self.mean is None or self.std is None:
-            self.fit(X_train)
-
-        z_test = np.mean((X_test - self.mean) / self.std, axis=1)
-        return None, z_test
+    
+    
