@@ -8,17 +8,23 @@ import os
 
 
 def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_path):
+    # Ensure 2D row-wise shape: (1, n_features)
     X_original = np.atleast_2d(X_original)
     X_reconstructed = np.atleast_2d(X_reconstructed)
     binary_mask = np.atleast_2d(binary_mask)
 
-    plt.figure(figsize=(12, 4))
-    x_vals = np.arange(X_original.shape[1])
-    plt.plot(x_vals, X_original[0], label="Original", color="orangered")
-    plt.plot(x_vals, X_reconstructed[0], label="Reconstructed", linestyle="--", color="purple")
+    # Flatten each to 1D: shape (n_features,)
+    original_line = X_original[0].flatten()
+    reconstructed_line = X_reconstructed[0].flatten()
+    anomaly_mask = binary_mask[0].flatten()
 
-    for i in range(len(binary_mask[0])):
-        if binary_mask[0, i] == 1:
+    x_vals = np.arange(original_line.shape[0])
+    plt.figure(figsize=(12, 4))
+    plt.plot(x_vals, original_line, label="Original", color="orangered")
+    plt.plot(x_vals, reconstructed_line, label="Reconstructed", linestyle="--", color="purple")
+
+    for i in range(len(anomaly_mask)):
+        if anomaly_mask[i] == 1:
             plt.axvline(x=i, color="orchid", linewidth=1, alpha=0.5)
 
     plt.legend()
