@@ -283,7 +283,13 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
 
     # Formatting
     ax.set_xlim((0, len(x_hat)))
-    ax.set_ylim((-1.2, 1.2))
+    ymin = x.iloc[0].min()
+    ymax = x.iloc[0].max()
+    yrange = ymax - ymin
+    padding = 0.1 * yrange  # Add 10% padding
+
+    ax.set_ylim(ymin - padding, ymax + padding)
+
     ax.set_xlabel('Features', size=42)
     ax.set_ylabel(metric, size=42)
     ax.set_title(subject, size=48)
