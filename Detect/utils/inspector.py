@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import random
+import streamlit as st
 from sklearn.preprocessing import StandardScaler
 from models.pca import PCAModel
 from utils import reporter
