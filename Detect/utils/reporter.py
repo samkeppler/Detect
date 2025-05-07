@@ -272,14 +272,13 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
         fig, ax = plt.subplots(1,1,figsize=(24, 8))
         ax.legend(fontsize=14, loc='upper right')
 
-        ax.plot(x_hat[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
-        ax.plot(x[0],color='xkcd:burnt orange',label='Original',linewidth=4)
+        ax.plot(x[0], color='xkcd:burnt orange', label='Original', linewidth=4)
 
         p_along_binary = filterSpurious(p_along)
 
-        ax.step(np.arange(0,len(p_along_binary)), p_along_binary*1.8*np.mean(x_hat), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
-        ax.fill_between(np.arange(0,len(p_along_binary)),np.zeros(len(p_along_binary)),p_along_binary*1.8*np.mean(x_hat), alpha=0.1, 
-                        edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
+        ax.step(np.arange(0, len(p_along_binary)), p_along_binary * 1.8 * np.mean(x), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
+        ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x), alpha=0.1,
+                edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
 
         ax.set_xlim((0,x_hat.shape[1]))
         ax.set_ylim((0,3*np.mean(x_hat)))
