@@ -34,7 +34,6 @@ def main():
     #Load datasheets
     #############################################
     rel_path = "../ressources/demog-short.csv"
-    demog = join(script_dir, rel_path)
     df_demog = loader.load_csv(demog)
 
     rel_path = "../ressources/features-short.xlsx"
@@ -154,8 +153,8 @@ def main():
                 finalpval = dfpval
                 finalvector = dfvector
 
-            finalpval.append(dfpval)
-            finalvector.append(dfvector)   
+            finalpval = pd.concat([finalpval, dfpval], ignore_index=True)
+            finalvector = pd.concat([finalvector, dfvector], ignore_index=True)
             once = False
 
         name = 'tests/p-val'+'_'+metric+'_'+title+'.csv'
