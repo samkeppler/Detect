@@ -284,7 +284,7 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
     ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x_hat),
                     alpha=0.1, edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
 
-    ax.set_xlim((0, x_hat.shape[1]))
+    ax.set_xlim((0, len(x_hat)))
     ax.set_ylim((0, 3 * np.mean(x_hat)))
     ax.set_xlabel('Features', size=42)
     ax.set_ylabel(metric, size=42)
