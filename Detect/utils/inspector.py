@@ -8,7 +8,7 @@ import seaborn as sns
 import random
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-from models import model_prep
+from models import autoencoder, model_prep
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler
 from models.model_prep import Model
 from utils import reporter
@@ -51,35 +51,20 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         else:
             st.error("No age or sex information found. Skipping regression step.")
         
+    
+
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
-    # Run model
-    model = Model(X_train, X_test, "Z-score")
+    model = Model(X_train, X_test, "Autoencoder")
     x_hat = model.run_once()
-
-    # Ensure x_hat is a 1D array of z-scores with correct shape
-    if isinstance(x_hat, pd.DataFrame):
-        x_hat_inv = x_hat.values.flatten()
-    elif isinstance(x_hat, pd.Series):
-        x_hat_inv = x_hat.values
-    elif isinstance(x_hat, np.ndarray):
-        x_hat_inv = x_hat.flatten()
-    else:
-        raise ValueError(f"x_hat is unexpected type: {type(x_hat)}")
-
-    # Use original test features for plotting only
-    x_inv = X_test_split
-    mae = np.abs(x_hat_inv)  # Use Z-score magnitudes as MAE
-
     
     #unnormalize
-    x_hat_inv = x_hat  # z-scores
-    x_inv = X_test_split  # original features, just for plotting
-    mae = np.abs(x_hat_inv)  # use Z-score magnitudes as MAE
-    sub_orig = x_hat_inv  # for permutation comparison
-
+    x_hat_inv = scaler.inverse_transform(x_hat)
+    x_inv = scaler.inverse_transform(X_test)
+    mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
+    sub_orig = x_hat_inv - x_inv
     #To accumulate error Distances
-    p = np.zeros(len(sub_orig))
+    p = np.zeros(len(sub_orig[0]))
     #Then, swap patient with HC, save in a vector a new K.
     #repeat for all HC, save in a matrix.
     count = 0
@@ -96,24 +81,23 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
 
         #6 Run 
-        model = Model(X_train, X_test, "Z-score")
+        model = Model(X_train, X_test, "Autoencoder")
         k_hat = model.run_once()
-        k_hat_inv = k_hat  # z-scores, no inverse
-        k_inv = None
-        k_mae = np.abs(k_hat)
-        sub = k_hat
-        sub_orig = np.asarray(sub_orig)
-        sub = np.asarray(sub)
-        for e in range(len(sub_orig)):
+        #unnormalize
+        k_hat_inv = scaler.inverse_transform(k_hat)
+        k_inv = scaler.inverse_transform(X_test)
+        k_mae = np.mean(np.abs(k_hat_inv-k_inv), axis = 1)
+        sub = k_hat_inv - k_inv
+        for e in range(len(sub_orig[0])):
             #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
                 #p[e] = p[e] + 1
-            if sub_orig[e] > 0:
-                if sub[e] >= sub_orig[e]:
-                    p[e] += 1
+            if sub_orig[0][e] > 0:
+                if sub[0][e] >= sub_orig[0][e]:
+                    p[e] = p[e] + 1 
             else:
-                if sub[e] < sub_orig[e]:
-                    p[e] += 1
-
+                if sub[0][e] < sub_orig[0][e]:
+                    p[e] = p[e] + 1
+                    
         if (np.mean(k_mae) > np.mean(mae)):
             count = count + 1
             
@@ -128,13 +112,5 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         if p_crit[i] <= max_p:
             p_along[i] = 1
                 
-    if hasattr(x_hat_inv, 'values'):
-        st.write("x_hat_inv is a DataFrame")
-    elif isinstance(x_hat_inv, np.ndarray):
-        st.write("x_hat_inv is ndarray")
-    else:
-        st.write("x_hat_inv type:", type(x_hat_inv))
-        st.write("x_hat_inv repr:", repr(x_hat_inv))
-            
     #K could be Zscore.
     return x_inv, x_hat_inv, mae, p_along, overall_p, p_div
