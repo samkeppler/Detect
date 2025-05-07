@@ -6,7 +6,7 @@ import pandas as pd
 import random
 import streamlit as st
 from sklearn.preprocessing import StandardScaler
-from models import model_prep
+from models.model_prep import Model
 from models.pca import PCAModel
 from utils import reporter
 
