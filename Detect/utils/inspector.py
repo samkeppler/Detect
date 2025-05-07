@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import random
 
 
-def inspector(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, threshold=2.0):
+def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, threshold=2.0):
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
