@@ -241,27 +241,30 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     dfvector['Group'] = group.iloc[0]
     dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-    # ---- 3. binary reconstructed features from Z-scores ----
-    # Determine correct feature columns
+        # ---- 3. binary reconstructed features from Z-scores ----
+    # Ensure x_hat is a numeric matrix with shape (n_features,) or (1, n_features)
     if isinstance(x_hat, pd.DataFrame):
         x_hat_numeric = x_hat.values
         feature_cols = x_hat.columns.tolist()
     elif isinstance(x_hat, np.ndarray):
         x_hat_numeric = x_hat
         feature_cols = [c for c in cols if c not in ('ID', 'Group')]
+    elif isinstance(x_hat, list):
+        x_hat_numeric = np.array(x_hat)
+        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     else:
-        raise ValueError("x_hat must be a pandas DataFrame or numpy array")
+        raise TypeError(f"x_hat is of unexpected type: {type(x_hat)}. Must be DataFrame, ndarray, or list.")
 
-    # Threshold Z-scores at 3
-    x_hat_binary = (np.abs(x_hat_numeric) > 3).astype(int)
+    # Validate shape
+    if x_hat_numeric.ndim != 1 and x_hat_numeric.shape[0] != 1:
+        raise ValueError(f"x_hat shape {x_hat_numeric.shape} is not valid. Expected shape (n_features,) or (1, n_features).")
 
-    # Ensure single row output with named columns
-    recon = pd.DataFrame([x_hat_binary.flatten()], columns=feature_cols)
+    # Flatten and threshold
+    x_hat_binary = (np.abs(x_hat_numeric).flatten() > 3).astype(int)
+    recon = pd.DataFrame([x_hat_binary], columns=feature_cols)
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
     recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
-
-    return dfpval, dfvector
     
 def filterSpurious(p_along):
     p_along_binary = np.zeros(len(p_along))
