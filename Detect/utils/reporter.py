@@ -261,36 +261,37 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
     fig, ax = plt.subplots(1, 1, figsize=(24, 8))
 
     # Plot original subject profile
-    ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2)
+    ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2, zorder=2)
 
     # Plot anomalies as vertical lines
     for i in range(len(p_along)):
         if p_along[i] == 1:
-            ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.8)
+            ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.6, zorder=1)
 
-    ax.set_title(title, fontsize=22)
-    ax.set_ylabel(metric, fontsize=18)
-    ax.set_xlabel('Node', fontsize=18)
-    ax.set_ylim(0, 1.4)
-    ax.legend(fontsize=14, loc='upper right')
-
-    # Optional: overlay anomaly shape
+    # Filter and plot shaded anomaly band
     p_along_binary = filterSpurious(p_along)
+    anomaly_base = -1.2
+    anomaly_height = 2.4  # from -1.2 to 1.2
+    ax.fill_between(np.arange(len(p_along_binary)),
+                    anomaly_base,
+                    anomaly_base + p_along_binary * anomaly_height,
+                    alpha=0.1, edgecolor='#b43486', facecolor='#b43486',
+                    step="pre", label="Anomaly", zorder=0)
 
-    # Plot shaded anomaly band
-    ax.step(np.arange(0, len(p_along_binary)), p_along_binary * 1.8 * np.mean(x_hat), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
-    ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x_hat),
-                    alpha=0.1, edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
+    # Optional: zero baseline for orientation
+    ax.axhline(0, color='gray', linewidth=1, linestyle='--', alpha=0.5)
 
+    # Formatting
     ax.set_xlim((0, len(x_hat)))
-    ax.set_ylim((0, 3 * np.mean(x_hat)))
+    ax.set_ylim((-1.2, 1.2))
     ax.set_xlabel('Features', size=42)
     ax.set_ylabel(metric, size=42)
     ax.set_title(subject, size=48)
     ax.tick_params(labelsize=28)
     ax.set_xticks(range(0, len(x.iloc[0]), 20))
     ax.set_xticklabels(np.arange(0, len(x.iloc[0]), 20))
-    ax.legend(fontsize=36, loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=3)
+
+    ax.legend(fontsize=28, loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, fancybox=True, shadow=True)
 
     ax.spines['left'].set_linewidth(3)
     ax.spines['bottom'].set_linewidth(3)
