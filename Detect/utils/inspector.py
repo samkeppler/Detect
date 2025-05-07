@@ -86,8 +86,8 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         k_inv = None
         k_mae = np.abs(k_hat)
         sub = k_hat
-        sub_orig = sub_orig.to_numpy()
-        sub = sub.to_numpy()
+        sub_orig = np.asarray(sub_orig)
+        sub = np.asarray(sub)
         for e in range(len(sub_orig)):
             #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
                 #p[e] = p[e] + 1
