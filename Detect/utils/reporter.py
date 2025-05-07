@@ -12,7 +12,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import zscore, pca, autoencoder
+from models import Zscore, PCA, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
