@@ -242,26 +242,24 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
     # ---- 3. binary reconstructed features from Z-scores ----
-    # Handle multiple possible types of x_hat
+    # Normalize input types and grab correct feature names
     if isinstance(x_hat, pd.DataFrame):
         x_hat_numeric = x_hat.values
-        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     elif isinstance(x_hat, pd.Series):
         x_hat_numeric = x_hat.values
-        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     elif isinstance(x_hat, np.ndarray):
         x_hat_numeric = x_hat
-        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     elif isinstance(x_hat, list):
         x_hat_numeric = np.array(x_hat)
-        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     else:
         st.write("DEBUG: Unrecognized x_hat:", x_hat)
         raise TypeError(f"x_hat is of unexpected type: {type(x_hat)}. Must be DataFrame, Series, ndarray, or list.")
 
-    # Flatten and apply z-score threshold
+    feature_cols = [c for c in cols if c not in ('ID', 'Group')]
+
+    # Flatten and threshold to binary
     x_hat_binary = (np.abs(x_hat_numeric).flatten() > 3).astype(int)
-    recon = pd.DataFrame([x_hat_binary], columns=feature_cols)
+    recon = pd.DataFrame(x_hat_binary.reshape(1, -1), columns=feature_cols)
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
     recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
