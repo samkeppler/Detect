@@ -84,3 +84,25 @@ def run(model):
 
     return M_train, M_test
     
+class PCAModel:
+    def __init__(self, n_components=0.85):
+        self.n_components = n_components
+        self.pca = PCA(n_components=n_components, svd_solver='full')
+        self.X_train = None
+        self.mean_ = None
+        self.inv_cov_ = None
+
+    def fit(self, X):
+        self.X_train = X
+        X_train_PCA = self.pca.fit_transform(X)
+        cov_matrix, inv_cov = covar_matrix(X_train_PCA)
+        self.mean_ = np.mean(X_train_PCA, axis=0)
+        self.inv_cov_ = inv_cov
+
+    def transform(self, X):
+        X_PCA = self.pca.transform(X)
+        dists = MahalanobisDist(self.inv_cov_, self.mean_, X_PCA)
+        return dists.reshape(-1, 1)  # shape (n_samples, 1)
+
+    def inverse_transform(self, X_scores):
+        # For compatibility: return zero baseline so mae = |
