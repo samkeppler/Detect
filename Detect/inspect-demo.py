@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from os.path import join, dirname, abspath
 import seaborn as sns
-
 from utils import loader, explorer, reporter, inspector
 
 #Top banner
