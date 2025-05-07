@@ -88,20 +88,19 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         #6 Run 
         model = Model(X_train, X_test, "Z-score")
         k_hat = model.run_once()
-        k_hat_inv = k_hat  # no inverse_transform for Z-score output
-        k_inv = None
-        k_mae = np.abs(k_hat)  # use z-score magnitude as error
-        sub = k_hat  # for plotting
+
+        # Ensure NumPy arrays
+        k_hat = k_hat.to_numpy()
+        sub = k_hat
+        k_mae = np.abs(k_hat)
+
         for e in range(len(sub_orig)):
-            #if np.abs(sub[0][e]) > np.abs(sub_orig[e]):
-                #p[e] = p[e] + 1
             if sub_orig[e] > 0:
                 if sub[e] >= sub_orig[e]:
-                    p[e] = p[e] + 1 
-            else:
+                    p[e] += 1
+             else:
                 if sub[e] < sub_orig[e]:
-                    p[e] = p[e] + 1
-
+                    p[e] += 1
                     
         if (np.mean(k_mae) > np.mean(mae)):
             count = count + 1
