@@ -269,8 +269,21 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
     sns.set_style("white")
     
     with _lock:
-        fig, ax = plt.subplots(1,1,figsize=(24, 8))
-        ax.legend(fontsize=14, loc='upper right')
+        fig, ax = plt.subplots(1, 1, figsize=(24, 8))
+
+# Plot original subject profile
+ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2)
+
+# Plot anomalies as vertical lines
+for i in range(len(p_along)):
+    if p_along[i] == 1:
+        ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.8)
+
+ax.set_title(title, fontsize=22)
+ax.set_ylabel(metric, fontsize=18)
+ax.set_xlabel('Node', fontsize=18)
+ax.set_ylim(0, 1.4)
+ax.legend(fontsize=14, loc='upper right')
 
         ax.plot(x_hat.iloc[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
         ax.plot(x.iloc[0],color='xkcd:burnt orange',label='Original',linewidth=4)
