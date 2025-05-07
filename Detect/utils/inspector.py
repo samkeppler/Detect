@@ -25,7 +25,8 @@ def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_
     plt.close()
 
 
-def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, threshold=2.0):
+def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, threshold=2.0, subject_id=None):
+    subject_id = subject_id or "unknown"
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
@@ -45,9 +46,10 @@ def run(X_train, X_test, y_test, out_path, model_type="pca", n_perm=1000, thresh
             X_original=X_test_scaled,
             X_reconstructed=x_inv,
             binary_mask=k_bin,
-            subject_id = subject_id or "unknown"
+            subject_id=subject_id,
             save_path=out_path
         )
+
 
     else:
         raise ValueError("Only 'pca' model is supported in this version.")
