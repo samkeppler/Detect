@@ -225,20 +225,29 @@ def save(result, method):
         autoencoder.save(result)
         
 def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
+    # ---- p-val summary ----
     data = [[subject, group.iloc[0], np.round(np.mean(mae), 3), p_overall]]
+    dfpval = pd.DataFrame(data, columns=['ID', 'Group', 'Error', 'p-val'])
 
-    dfpval = pd.DataFrame(data, index=[0], columns=['ID', 'Group', 'Error', 'p-val'])
-    dfpval.to_csv('tests/p-val'+'_'+metric+'_'+title+'.csv', mode='a', header=once, index=False)
+    # Write only one row
+    if once:
+        dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', index=False)
+    else:
+        dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', mode='a', header=False, index=False)
 
+    # ---- Anomaly vector (optional) ----
     p_along = np.insert(p_along, 0, 0)
-    x_hat =  np.insert(x_hat, 0, 0)
-
-    dfvector = pd.DataFrame([p_along], index=[0], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
+    dfvector = pd.DataFrame([p_along], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
+    dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-    dfvector.to_csv('tests/anomaly-vector'+'_'+metric+'_'+title+'.csv', mode='a', header=once, index=False)
-    
+    # ---- Full reconstructed features ----
+    recon = pd.DataFrame([x_hat], columns=cols)
+    recon.insert(0, 'ID', subject)
+    recon.insert(1, 'Group', group.iloc[0])
+    recon.to_csv(f'tests/reconstructed_{metric}_{title}.csv', mode='a', header=once, index=False)
+
     return dfpval, dfvector
     
 def filterSpurious(p_along):
