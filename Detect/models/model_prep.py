@@ -11,7 +11,7 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-from models import zscore, pca
+from models import Zscore, PCA, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -29,22 +29,16 @@ class Model:
         return self.x_test
     
     def run(self):
-        if self.modeltype == "Z-score":
-            return zscore.run(self)
-        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
-            return pca.run(self)
+        if(self.modeltype == "Z-score"):
+            return Zscore.run(self)
+        elif(self.modeltype == "PCA"):
+            return PCA.run(self)
         else:
-            raise ValueError("Unsupported model type: " + self.modeltype) 
+            return autoencoder.run(self) 
         
     def run_once(self):
-        if self.modeltype == "Z-score":
-            model = zscore.ZScoreModel()
-            _, z_scores = model.run(self.x_train, self.x_test)
-            return np.abs(z_scores) > 2  # Binary anomalies
-        elif self.modeltype == "PCA":  # Capitalized string for matching, but import is lowercase
-            return pca.run_once(self)
-        else:
-            raise ValueError("Unsupported model type: " + self.modeltype)
+        return autoencoder.run_once(self)
+
 def plotDistribution(d_train, xlim, ylim, label, method):
     with _lock:    
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -189,4 +183,3 @@ def normalize_features(X_train_split, X_test_split, method):
     X_test_split[X_test_split.columns] = scaler.transform(X_test_split[X_test_split.columns])
 
     return scaler, X_train_split, X_test_split
-
