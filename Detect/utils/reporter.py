@@ -12,7 +12,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import zscore, pca, autoencoder
+from models import zscore, pca
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -272,8 +272,8 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
         fig, ax = plt.subplots(1,1,figsize=(24, 8))
         ax.legend(fontsize=14, loc='upper right')
 
-        ax.plot(x_hat[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
-        ax.plot(x[0],color='xkcd:burnt orange',label='Original',linewidth=4)
+        ax.plot(x_hat.iloc[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
+        ax.plot(x.iloc[0],color='xkcd:burnt orange',label='Original',linewidth=4)
 
         p_along_binary = filterSpurious(p_along)
 
