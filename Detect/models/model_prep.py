@@ -11,7 +11,7 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-from models import Zscore, PCA, autoencoder
+from models import zscore, pca, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -30,9 +30,9 @@ class Model:
     
     def run(self):
         if(self.modeltype == "Z-score"):
-            return Zscore.run(self)
+            return zscore.run(self)
         elif(self.modeltype == "PCA"):
-            return PCA.run(self)
+            return pca.run(self)
         else:
             return autoencoder.run(self) 
         
