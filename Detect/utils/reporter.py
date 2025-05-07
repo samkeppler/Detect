@@ -230,10 +230,8 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     dfpval = pd.DataFrame(data, index=[0], columns=['ID', 'Group', 'Error', 'p-val'])
     dfpval.to_csv('tests/p-val'+'_'+metric+'_'+title+'.csv', mode='a', header=once, index=False)
 
-    p_along = np.insert(p_along, 0, 0, axis=0)
-    p_along = np.insert(p_along, 0, 0, axis=0)
-    x_hat =  np.insert(x_hat, 0, 0, axis=1)
-    x_hat =  np.insert(x_hat, 0, 0, axis=1)
+    p_along = np.insert(p_along, 0, 0)
+    x_hat =  np.insert(x_hat, 0, 0)
 
     dfvector = pd.DataFrame([p_along], index=[0], columns=cols) #replace with [p_along] for binary results
     dfvector['ID'] = subject
