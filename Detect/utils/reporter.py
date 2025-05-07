@@ -260,63 +260,49 @@ def filterSpurious(p_along):
     return p_along_binary
     
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
-    st.success("Mean Absolute Error (MAE, unscaled): " + str(np.round(np.mean(mae), 3)))
+    fig, ax = plt.subplots(1, 1, figsize=(24, 8))
 
-    if (p_overall < max(0.01, (1/p_div))):
-        st.success("p < "+str(np.round(1/p_div,3)))
-    else:
-        st.error("p = "+str(p_overall))
-    sns.set_style("white")
-    
-    with _lock:
-        fig, ax = plt.subplots(1, 1, figsize=(24, 8))
+    # Plot original subject profile
+    ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2)
 
-# Plot original subject profile
-ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2)
+    # Plot anomalies as vertical lines
+    for i in range(len(p_along)):
+        if p_along[i] == 1:
+            ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.8)
 
-# Plot anomalies as vertical lines
-for i in range(len(p_along)):
-    if p_along[i] == 1:
-        ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.8)
+    ax.set_title(title, fontsize=22)
+    ax.set_ylabel(metric, fontsize=18)
+    ax.set_xlabel('Node', fontsize=18)
+    ax.set_ylim(0, 1.4)
+    ax.legend(fontsize=14, loc='upper right')
 
-ax.set_title(title, fontsize=22)
-ax.set_ylabel(metric, fontsize=18)
-ax.set_xlabel('Node', fontsize=18)
-ax.set_ylim(0, 1.4)
-ax.legend(fontsize=14, loc='upper right')
+    # Optional: overlay anomaly shape
+    p_along_binary = filterSpurious(p_along)
 
-        ax.plot(x_hat.iloc[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
-        ax.plot(x.iloc[0],color='xkcd:burnt orange',label='Original',linewidth=4)
+    # Plot shaded anomaly band
+    ax.step(np.arange(0, len(p_along_binary)), p_along_binary * 1.8 * np.mean(x_hat), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
+    ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x_hat),
+                    alpha=0.1, edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
 
-        p_along_binary = filterSpurious(p_along)
+    ax.set_xlim((0, x_hat.shape[1]))
+    ax.set_ylim((0, 3 * np.mean(x_hat)))
+    ax.set_xlabel('Features', size=42)
+    ax.set_ylabel(metric, size=42)
+    ax.set_title(subject, size=48)
+    ax.tick_params(labelsize=28)
+    ax.set_xticks(range(0, len(x.iloc[0]), 20))
+    ax.set_xticklabels(np.arange(0, len(x.iloc[0]), 20))
+    ax.legend(fontsize=36, loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=3)
 
-        ax.step(np.arange(0,len(p_along_binary)), p_along_binary*1.8*np.mean(x_hat), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
-        ax.fill_between(np.arange(0,len(p_along_binary)),np.zeros(len(p_along_binary)),p_along_binary*1.8*np.mean(x_hat), alpha=0.1, 
-                        edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
+    ax.spines['left'].set_linewidth(3)
+    ax.spines['bottom'].set_linewidth(3)
+    sns.despine()
 
-        ax.set_xlim((0,x_hat.shape[1]))
-        ax.set_ylim((0,3*np.mean(x_hat)))
-        ax.set_xlabel('Features',size=42)
-        ax.set_ylabel(metric,size=42)
-        ax.set_title(subject, size=48)
-        ax.tick_params(labelsize=28)
-        ax.set_xticks(range(0, len(x[0]), 20))
-        ax.set_xticklabels(np.arange(0, len(x[0]), 20))
-        ax.legend(fontsize=36, loc='upper center', bbox_to_anchor=(0.5, -0.05),
-              fancybox=True, shadow=True, ncol=3)
+    fig.tight_layout()
+    fig.savefig('figures/' + subject + '_profile_' + metric + '.svg', dpi=200)
+    st.pyplot(plt)
 
-        ax.spines['left'].set_linewidth(3)
-        ax.spines['bottom'].set_linewidth(3)
-        sns.despine()
+    dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
+    plt.close(fig)
 
-        fig.tight_layout()
-        fig.savefig('figures/'+subject+'_profile_'+metric+'.svg', dpi=200)
-        st.pyplot(plt)
-
-        dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
-
-        plt.close(fig)
-    
     return dfpval, dfvector
-    
-        
