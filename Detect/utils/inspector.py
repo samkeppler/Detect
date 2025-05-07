@@ -53,8 +53,24 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
+    # Run model
     model = Model(X_train, X_test, "Z-score")
     x_hat = model.run_once()
+
+    # Ensure x_hat is a 1D array of z-scores with correct shape
+    if isinstance(x_hat, pd.DataFrame):
+        x_hat_inv = x_hat.values.flatten()
+    elif isinstance(x_hat, pd.Series):
+        x_hat_inv = x_hat.values
+    elif isinstance(x_hat, np.ndarray):
+        x_hat_inv = x_hat.flatten()
+    else:
+        raise ValueError(f"x_hat is unexpected type: {type(x_hat)}")
+
+    # Use original test features for plotting only
+    x_inv = X_test_split
+    mae = np.abs(x_hat_inv)  # Use Z-score magnitudes as MAE
+
     
     #unnormalize
     x_hat_inv = x_hat  # z-scores
