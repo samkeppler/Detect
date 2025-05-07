@@ -12,7 +12,7 @@ import seaborn as sns
 import base64
 from numpy import interp
 
-from models import zscore, pca
+from models import zscore, pca, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
@@ -225,59 +225,22 @@ def save(result, method):
         autoencoder.save(result)
         
 def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
-    # ---- 1. p-value summary ----
     data = [[subject, group.iloc[0], np.round(np.mean(mae), 3), p_overall]]
-    dfpval = pd.DataFrame(data, columns=['ID', 'Group', 'Error', 'p-val'])
 
-    if once:
-        dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', index=False)
-    else:
-        dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', mode='a', header=False, index=False)
+    dfpval = pd.DataFrame(data, index=[0], columns=['ID', 'Group', 'Error', 'p-val'])
+    dfpval.to_csv('tests/p-val'+'_'+metric+'_'+title+'.csv', mode='a', header=once, index=False)
 
-    # ---- 2. anomaly vector ----
-    p_along = np.insert(p_along, 0, 0)  # optional alignment
-    dfvector = pd.DataFrame([p_along], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
+    p_along = np.insert(p_along, 0, 0, axis=0)
+    p_along = np.insert(p_along, 0, 0, axis=0)
+    x_hat =  np.insert(x_hat, 0, 0, axis=1)
+    x_hat =  np.insert(x_hat, 0, 0, axis=1)
+
+    dfvector = pd.DataFrame([p_along], index=[0], columns=cols) #replace with [p_along] for binary results
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
-    dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-    # ---- 3. binary reconstructed features from Z-scores ----
-    # Normalize input types and grab correct feature names
-    if isinstance(x_hat, pd.DataFrame):
-        x_hat_numeric = x_hat.values
-    elif isinstance(x_hat, pd.Series):
-        x_hat_numeric = x_hat.values
-    elif isinstance(x_hat, np.ndarray):
-        x_hat_numeric = x_hat
-    elif isinstance(x_hat, list):
-        x_hat_numeric = np.array(x_hat)
-    else:
-        st.write("DEBUG: Unrecognized x_hat:", x_hat)
-        raise TypeError(f"x_hat is of unexpected type: {type(x_hat)}. Must be DataFrame, Series, ndarray, or list.")
-
-    feature_cols = [c for c in cols if c not in ('ID', 'Group')]
-
-    # Flatten and threshold to binary
-    # Threshold to binary
-    x_hat_binary = (np.abs(x_hat_numeric) > 3).astype(int)
-
-    # Make sure it's a 1D array of the same length as feature_cols
-    x_hat_binary = x_hat_binary.flatten()
-
-    # Safety check
-    if len(x_hat_binary) != len(feature_cols):
-        st.write("DEBUG: mismatch in binary shape and feature names")
-        st.write("x_hat_binary length:", len(x_hat_binary))
-        st.write("feature_cols length:", len(feature_cols))
-        raise ValueError("x_hat_binary length does not match number of feature columns")
-
-    # Now safely convert to a 1-row DataFrame
-    recon = pd.DataFrame([x_hat_binary], columns=feature_cols)
-
-    recon.insert(0, 'ID', subject)
-    recon.insert(1, 'Group', group.iloc[0])
-    recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
-
+    dfvector.to_csv('tests/anomaly-vector'+'_'+metric+'_'+title+'.csv', mode='a', header=once, index=False)
+    
     return dfpval, dfvector
     
 def filterSpurious(p_along):
@@ -297,64 +260,50 @@ def filterSpurious(p_along):
     return p_along_binary
     
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
-    fig, ax = plt.subplots(1, 1, figsize=(24, 8))
-    st.write("DEBUG: type(x_hat) BEFORE write_pval =", type(x_hat))
-    st.write("DEBUG: repr(x_hat) BEFORE write_pval =", repr(x_hat))
+    st.success("Mean Absolute Error (MAE, unscaled): " + str(np.round(np.mean(mae), 3)))
 
-    # Plot original subject profile
-    ax.plot(x.iloc[0], color='xkcd:burnt orange', label='Original', linewidth=2, zorder=2)
-
-    # Plot anomalies as vertical lines
-    for i in range(len(p_along)):
-        if p_along[i] == 1:
-            ax.axvline(x=i, color='orchid', linestyle=':', alpha=0.6, zorder=1)
-
-    # Filter and plot shaded anomaly band
-    p_along_binary = filterSpurious(p_along)
-    anomaly_base = -1.2
-    anomaly_height = 2.4  # from -1.2 to 1.2
-    ax.fill_between(np.arange(len(p_along_binary)),
-                    anomaly_base,
-                    anomaly_base + p_along_binary * anomaly_height,
-                    alpha=0.1, edgecolor='#b43486', facecolor='#b43486',
-                    step="pre", label="Anomaly", zorder=0)
-
-    # Optional: zero baseline for orientation
-    ax.axhline(0, color='gray', linewidth=1, linestyle='--', alpha=0.5)
-
-    # Formatting
-    # If x_hat is a DataFrame or 1D array, get number of features
-    if isinstance(x_hat, pd.DataFrame):
-        n_features = x_hat.shape[1]
+    if (p_overall < max(0.01, (1/p_div))):
+        st.success("p < "+str(np.round(1/p_div,3)))
     else:
-        n_features = len(x_hat)
+        st.error("p = "+str(p_overall))
+    sns.set_style("white")
+    
+    with _lock:
+        fig, ax = plt.subplots(1,1,figsize=(24, 8))
+        ax.legend(fontsize=14, loc='upper right')
 
-    ax.set_xlim((0, n_features))
-    ymin = x.iloc[0].min()
-    ymax = x.iloc[0].max()
-    yrange = ymax - ymin
-    padding = 0.1 * yrange  # Add 10% padding
+        ax.plot(x_hat[0],color='#6a1596',label='Reconstructed',linewidth=4, linestyle="dashed", alpha=0.8)
+        ax.plot(x[0],color='xkcd:burnt orange',label='Original',linewidth=4)
 
-    ax.set_ylim(ymin - padding, ymax + padding)
+        p_along_binary = filterSpurious(p_along)
 
-    ax.set_xlabel('Features', size=42)
-    ax.set_ylabel(metric, size=42)
-    ax.set_title(subject, size=48)
-    ax.tick_params(labelsize=28)
-    ax.set_xticks(range(0, len(x.iloc[0]), 20))
-    ax.set_xticklabels(np.arange(0, len(x.iloc[0]), 20))
+        ax.step(np.arange(0,len(p_along_binary)), p_along_binary*1.8*np.mean(x_hat), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
+        ax.fill_between(np.arange(0,len(p_along_binary)),np.zeros(len(p_along_binary)),p_along_binary*1.8*np.mean(x_hat), alpha=0.1, 
+                        edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
 
-    ax.legend(fontsize=28, loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, fancybox=True, shadow=True)
+        ax.set_xlim((0,x_hat.shape[1]))
+        ax.set_ylim((0,3*np.mean(x_hat)))
+        ax.set_xlabel('Features',size=42)
+        ax.set_ylabel(metric,size=42)
+        ax.set_title(subject, size=48)
+        ax.tick_params(labelsize=28)
+        ax.set_xticks(range(0, len(x[0]), 20))
+        ax.set_xticklabels(np.arange(0, len(x[0]), 20))
+        ax.legend(fontsize=36, loc='upper center', bbox_to_anchor=(0.5, -0.05),
+              fancybox=True, shadow=True, ncol=3)
 
-    ax.spines['left'].set_linewidth(3)
-    ax.spines['bottom'].set_linewidth(3)
-    sns.despine()
+        ax.spines['left'].set_linewidth(3)
+        ax.spines['bottom'].set_linewidth(3)
+        sns.despine()
 
-    fig.tight_layout()
-    fig.savefig('figures/' + subject + '_profile_' + metric + '.svg', dpi=200)
-    st.pyplot(plt)
+        fig.tight_layout()
+        fig.savefig('figures/'+subject+'_profile_'+metric+'.svg', dpi=200)
+        st.pyplot(plt)
 
-    dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
-    plt.close(fig)
+        dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
 
+        plt.close(fig)
+    
     return dfpval, dfvector
+    
+        
