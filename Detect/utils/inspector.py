@@ -64,6 +64,10 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     mae = np.abs(x_hat_inv)  # use absolute z-score as "error"
     sub_orig = x_hat_inv  # for plotting
 
+    # Convert Series to NumPy arrays
+    sub_orig = sub_orig.to_numpy()
+    sub = sub_orig.copy()  # assuming you're comparing to a permuted version later
+
     #To accumulate error Distances
     p = np.zeros(len(sub_orig))  # sub_orig is now 1D
     #Then, swap patient with HC, save in a vector a new K.
