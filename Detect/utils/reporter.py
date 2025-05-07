@@ -225,7 +225,7 @@ def save(result, method):
         autoencoder.save(result)
         
 def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
-    # ---- p-val summary ----
+    # ---- 1. p-value summary (1 row) ----
     data = [[subject, group.iloc[0], np.round(np.mean(mae), 3), p_overall]]
     dfpval = pd.DataFrame(data, columns=['ID', 'Group', 'Error', 'p-val'])
 
@@ -234,23 +234,20 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     else:
         dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', mode='a', header=False, index=False)
 
-    # ---- Anomaly vector ----
-    p_along = np.insert(p_along, 0, 0)
+    # ---- 2. anomaly vector ----
+    p_along = np.insert(p_along, 0, 0)  # optional shift
     dfvector = pd.DataFrame([p_along], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
     dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-    # ---- Reconstructed features ----
-    # Ensure ID/Group are not in cols to avoid duplicate insert
+    # ---- 3. reconstructed features ----
+    # Remove ID/Group if accidentally included in cols
     cleaned_cols = [c for c in cols if c not in ('ID', 'Group')]
     recon = pd.DataFrame([x_hat], columns=cleaned_cols)
-
-    # Insert metadata safely
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
-
-    recon.to_csv(f'tests/reconstructed_{metric}_{title}.csv', mode='a', header=once, index=False)
+    recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
 
     return dfpval, dfvector
     
