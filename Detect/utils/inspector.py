@@ -49,13 +49,13 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
     model = Model(X_train, X_test, "PCAModel")
-    x_hat = model.run_once()
-    
-    #unnormalize
-    x_hat_inv = scaler.inverse_transform(x_hat)
-    x_inv = scaler.inverse_transform(X_test)
-    mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
-    sub_orig = x_hat_inv - x_inv
+    z = model.run_once()                         # shape (n_samples, 1)
+    mae = np.abs(z).flatten()                    # anomaly score
+    x_hat = z                                    # reassign so output remains consistent
+    x_hat_inv = np.zeros_like(X_test)            # placeholder to match expected shape
+    x_inv = X_test                               
+    sub_orig = z.T                               # shape (1, features) for sub_orig[0][e]
+
     #To accumulate error Distances
     p = np.zeros(len(sub_orig[0]))
     #Then, swap patient with HC, save in a vector a new K.
