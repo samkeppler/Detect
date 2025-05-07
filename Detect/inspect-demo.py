@@ -34,6 +34,7 @@ def main():
     #Load datasheets
     #############################################
     rel_path = "../ressources/demog-short.csv"
+    demog = join(script_dir, rel_path)
     df_demog = loader.load_csv(demog)
 
     rel_path = "../ressources/features-short.xlsx"
