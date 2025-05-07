@@ -88,14 +88,14 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         k_inv = None
         k_mae = np.abs(k_hat)  # use z-score magnitude as error
         sub = k_hat  # for plotting
-        for e in range(len(sub_orig[0])):
-            #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
+        for e in range(len(sub_orig)):
+            #if np.abs(sub[0][e]) > np.abs(sub_orig[e]):
                 #p[e] = p[e] + 1
-            if sub_orig[0][e] > 0:
-                if sub[0][e] >= sub_orig[0][e]:
+            if sub_orig[e] > 0:
+                if sub[0][e] >= sub_orig[e]:
                     p[e] = p[e] + 1 
             else:
-                if sub[0][e] < sub_orig[0][e]:
+                if sub[0][e] < sub_orig[e]:
                     p[e] = p[e] + 1
                     
         if (np.mean(k_mae) > np.mean(mae)):
