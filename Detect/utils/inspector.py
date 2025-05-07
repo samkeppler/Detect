@@ -8,7 +8,7 @@ import seaborn as sns
 import random
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-from models import autoencoder, model_prep
+from models import model_prep
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler
 from models.model_prep import Model
 from utils import reporter
@@ -53,7 +53,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
-    model = Model(X_train, X_test, "Autoencoder")
+    model = Model(X_train, X_test, "Z-score")
     x_hat = model.run_once()
     
     #unnormalize
