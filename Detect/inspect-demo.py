@@ -161,7 +161,8 @@ def main():
         name = 'tests/p-val'+'_'+metric+'_'+title+'.csv'
         st.markdown(reporter.get_csv_link(finalpval,name), unsafe_allow_html=True)
         name = 'tests/reconstructed-features'+'_'+metric+'_'+title+'.csv'
-        st.markdown(reporter.get_csv_link_to_xhat(finalvector,name), unsafe_allow_html=True)
+        df_recon = pd.read_csv(name)  # Load the actual reconstructed features you just saved
+        st.markdown(reporter.get_csv_link_to_xhat(df_recon, name), unsafe_allow_html=True)
 
     #if st.sidebar.button("Save report"):
         #reporter.save(x_hat)
