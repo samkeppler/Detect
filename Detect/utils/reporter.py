@@ -233,7 +233,7 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     p_along = np.insert(p_along, 0, 0)
     x_hat =  np.insert(x_hat, 0, 0)
 
-    dfvector = pd.DataFrame([p_along], index=[0], columns=cols) #replace with [p_along] for binary results
+    dfvector = pd.DataFrame([p_along], index=[0], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
 
