@@ -283,9 +283,9 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
 
         p_along_binary = filterSpurious(p_along)
 
-        ax.step(np.arange(0, len(p_along_binary)), p_along_binary * 1.8 * np.mean(x), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
-        ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x),
-                        alpha=0.1, edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
+        for i in range(len(p_along_binary)):
+            if p_along_binary[i] == 1:
+                ax.axvline(x=i, color="#b43486", linewidth=2, alpha=0.5, linestyle="dotted")
 
         ax.set_xlim((0, x.shape[1]))
         ax.set_ylim((0, 3 * np.mean(x)))
