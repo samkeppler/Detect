@@ -2,17 +2,11 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import matplotlib.pyplot as plt
-import streamlit as st
 import pandas as pd
-import seaborn as sns
 import random
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-from models import autoencoder, model_prep
-from sklearn.preprocessing import  StandardScaler, MinMaxScaler
-from models.model_prep import Model
+from sklearn.preprocessing import StandardScaler
+from models.pca import PCAModel
 from utils import reporter
-from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 def getSubject(HC, y_HC, X, subject, original, insert=False):
     X_train_split = HC.loc[HC['ID'] != subject]
@@ -51,11 +45,10 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         else:
             st.error("No age or sex information found. Skipping regression step.")
         
-    
 
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
-    model = Model(X_train, X_test, "Autoencoder")
+    model = Model(X_train, X_test, "PCAModel")
     x_hat = model.run_once()
     
     #unnormalize
@@ -81,7 +74,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
 
         #6 Run 
-        model = Model(X_train, X_test, "Autoencoder")
+        model = Model(X_train, X_test, "PCAModel")
         k_hat = model.run_once()
         #unnormalize
         k_hat_inv = scaler.inverse_transform(k_hat)
