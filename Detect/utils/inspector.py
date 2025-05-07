@@ -8,15 +8,10 @@ import os
 
 
 def plot_pca_anomaly(X_original, X_reconstructed, binary_mask, subject_id, save_path):
-    # Ensure 2D row-wise shape: (1, n_features)
-    X_original = np.atleast_2d(X_original)
-    X_reconstructed = np.atleast_2d(X_reconstructed)
-    binary_mask = np.atleast_2d(binary_mask)
-
-    # Flatten each to 1D: shape (n_features,)
-    original_line = X_original[0].flatten()
-    reconstructed_line = X_reconstructed[0].flatten()
-    anomaly_mask = binary_mask[0].flatten()
+    # Convert everything to 1D arrays safely
+    original_line = np.ravel(X_original)
+    reconstructed_line = np.ravel(X_reconstructed)
+    anomaly_mask = np.ravel(binary_mask)
 
     x_vals = np.arange(original_line.shape[0])
     plt.figure(figsize=(12, 4))
