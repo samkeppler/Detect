@@ -55,21 +55,16 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
 
     #6 Run 
     #Run once to get Kreal whch is x_hat - x. 
-    model = Model(X_train, X_test, "Z-score")
+    model = Model(X_train, X_test, "Autoencoder")
     x_hat = model.run_once()
     
     #unnormalize
-    x_hat_inv = x_hat  # No inverse_transform for Z-score model
-    x_inv = None
-    mae = np.abs(x_hat_inv)  # use absolute z-score as "error"
-    sub_orig = x_hat_inv  # for plotting
-
-    # Convert Series to NumPy arrays
-    sub_orig = sub_orig.to_numpy()
-    sub = sub_orig.copy()  # assuming you're comparing to a permuted version later
-
+    x_hat_inv = scaler.inverse_transform(x_hat)
+    x_inv = scaler.inverse_transform(X_test)
+    mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
+    sub_orig = x_hat_inv - x_inv
     #To accumulate error Distances
-    p = np.zeros(len(sub_orig))  # sub_orig is now 1D
+    p = np.zeros(len(sub_orig[0]))
     #Then, swap patient with HC, save in a vector a new K.
     #repeat for all HC, save in a matrix.
     count = 0
@@ -86,21 +81,22 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
         
 
         #6 Run 
-        model = Model(X_train, X_test, "Z-score")
+        model = Model(X_train, X_test, "Autoencoder")
         k_hat = model.run_once()
-
-        # Ensure NumPy arrays
-        k_hat = k_hat.to_numpy()
-        sub = k_hat
-        k_mae = np.abs(k_hat)
-
-        for e in range(len(sub_orig)):
-            if sub_orig[e] > 0:
-                if sub[e] >= sub_orig[e]:
-                    p[e] += 1
+        #unnormalize
+        k_hat_inv = scaler.inverse_transform(k_hat)
+        k_inv = scaler.inverse_transform(X_test)
+        k_mae = np.mean(np.abs(k_hat_inv-k_inv), axis = 1)
+        sub = k_hat_inv - k_inv
+        for e in range(len(sub_orig[0])):
+            #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
+                #p[e] = p[e] + 1
+            if sub_orig[0][e] > 0:
+                if sub[0][e] >= sub_orig[0][e]:
+                    p[e] = p[e] + 1 
             else:
-                if sub[e] < sub_orig[e]:
-                    p[e] += 1
+                if sub[0][e] < sub_orig[0][e]:
+                    p[e] = p[e] + 1
                     
         if (np.mean(k_mae) > np.mean(mae)):
             count = count + 1
