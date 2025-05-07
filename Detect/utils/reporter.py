@@ -267,42 +267,46 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
     else:
         st.error("p = "+str(p_overall))
     sns.set_style("white")
-    
+
+    x = np.asarray(x)
+    x_hat = np.asarray(x_hat)
+
     with _lock:
         fig, ax = plt.subplots(1,1,figsize=(24, 8))
         ax.legend(fontsize=14, loc='upper right')
+
+        if x_hat.shape[1] == x.shape[1]:
+            ax.plot(x_hat[0], color='#6a1596', label='Reconstructed', linewidth=4, linestyle="dashed", alpha=0.8)
 
         ax.plot(x[0], color='xkcd:burnt orange', label='Original', linewidth=4)
 
         p_along_binary = filterSpurious(p_along)
 
         ax.step(np.arange(0, len(p_along_binary)), p_along_binary * 1.8 * np.mean(x), color="#b43486", linewidth=2, linestyle="dotted", alpha=0.5)
-        ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x), alpha=0.1,
-                edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
+        ax.fill_between(np.arange(0, len(p_along_binary)), np.zeros(len(p_along_binary)), p_along_binary * 1.8 * np.mean(x),
+                        alpha=0.1, edgecolor='#b43486', facecolor='#b43486', step="pre", label="Anomaly")
 
-        ax.set_xlim((0,x_hat.shape[1]))
-        ax.set_ylim((0,3*np.mean(x_hat)))
-        ax.set_xlabel('Features',size=42)
-        ax.set_ylabel(metric,size=42)
+        ax.set_xlim((0, x.shape[1]))
+        ax.set_ylim((0, 3 * np.mean(x)))
+        ax.set_xlabel('Features', size=42)
+        ax.set_ylabel(metric, size=42)
         ax.set_title(subject, size=48)
         ax.tick_params(labelsize=28)
         ax.set_xticks(range(0, len(x[0]), 20))
         ax.set_xticklabels(np.arange(0, len(x[0]), 20))
         ax.legend(fontsize=36, loc='upper center', bbox_to_anchor=(0.5, -0.05),
-              fancybox=True, shadow=True, ncol=3)
+                  fancybox=True, shadow=True, ncol=3)
 
         ax.spines['left'].set_linewidth(3)
         ax.spines['bottom'].set_linewidth(3)
         sns.despine()
 
         fig.tight_layout()
-        fig.savefig('figures/'+subject+'_profile_'+metric+'.svg', dpi=200)
+        fig.savefig('figures/' + subject + '_profile_' + metric + '.svg', dpi=200)
         st.pyplot(plt)
 
         dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
 
         plt.close(fig)
-    
+
     return dfpval, dfvector
-    
-        
