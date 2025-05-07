@@ -241,11 +241,11 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
     dfvector['Group'] = group.iloc[0]
     dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-        # ---- 3. binary reconstructed features from Z-scores ----
-    # Ensure x_hat is a numeric matrix with shape (n_features,) or (1, n_features)
+    # ---- 3. binary reconstructed features from Z-scores ----
+    # Handle x_hat from different sources: DataFrame, array, or list
     if isinstance(x_hat, pd.DataFrame):
         x_hat_numeric = x_hat.values
-        feature_cols = x_hat.columns.tolist()
+        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     elif isinstance(x_hat, np.ndarray):
         x_hat_numeric = x_hat
         feature_cols = [c for c in cols if c not in ('ID', 'Group')]
@@ -253,18 +253,18 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
         x_hat_numeric = np.array(x_hat)
         feature_cols = [c for c in cols if c not in ('ID', 'Group')]
     else:
+        st.write("DEBUG: Unrecognized x_hat:", x_hat)
         raise TypeError(f"x_hat is of unexpected type: {type(x_hat)}. Must be DataFrame, ndarray, or list.")
 
-    # Validate shape
-    if x_hat_numeric.ndim != 1 and x_hat_numeric.shape[0] != 1:
-        raise ValueError(f"x_hat shape {x_hat_numeric.shape} is not valid. Expected shape (n_features,) or (1, n_features).")
-
-    # Flatten and threshold
+    # Flatten and threshold to binary
     x_hat_binary = (np.abs(x_hat_numeric).flatten() > 3).astype(int)
     recon = pd.DataFrame([x_hat_binary], columns=feature_cols)
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
     recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
+
+    return dfpval, dfvector
+
     
 def filterSpurious(p_along):
     p_along_binary = np.zeros(len(p_along))
