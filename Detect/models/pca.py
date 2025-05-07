@@ -105,4 +105,6 @@ class PCAModel:
         return dists.reshape(-1, 1)  # shape (n_samples, 1)
 
     def inverse_transform(self, X_scores):
-        # For compatibility: return zero baseline so mae = |
+        # For PCA + Mahalanobis, inverse transform isn't meaningful.
+        # We'll return zeros so MAE = |score| works in inspector.
+        return np.zeros_like(X_scores)
