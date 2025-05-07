@@ -235,23 +235,28 @@ def write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group,
         dfpval.to_csv(f'tests/p-val_{metric}_{title}.csv', mode='a', header=False, index=False)
 
     # ---- 2. anomaly vector ----
-    p_along = np.insert(p_along, 0, 0)  # optional alignment pad
+    p_along = np.insert(p_along, 0, 0)  # optional alignment
     dfvector = pd.DataFrame([p_along], columns=[f'Anomaly_{i}' for i in range(len(p_along))])
     dfvector['ID'] = subject
     dfvector['Group'] = group.iloc[0]
     dfvector.to_csv(f'tests/anomaly-vector_{metric}_{title}.csv', mode='a', header=once, index=False)
 
-    # ---- 3. binary reconstructed features from z-scores ----
-    # Ensure we use original feature names and no duplicates
-    cleaned_cols = [c for c in cols if c not in ('ID', 'Group')]
-    
-    # x_hat should be a 1D z-score array or a 2D array with shape (1, n_features)
-    if x_hat.ndim == 2:
-        x_hat = x_hat.flatten()
-    
-    x_hat_binary = (np.abs(x_hat) > 3).astype(int)
+    # ---- 3. binary reconstructed features from Z-scores ----
+    # Determine correct feature columns
+    if isinstance(x_hat, pd.DataFrame):
+        x_hat_numeric = x_hat.values
+        feature_cols = x_hat.columns.tolist()
+    elif isinstance(x_hat, np.ndarray):
+        x_hat_numeric = x_hat
+        feature_cols = [c for c in cols if c not in ('ID', 'Group')]
+    else:
+        raise ValueError("x_hat must be a pandas DataFrame or numpy array")
 
-    recon = pd.DataFrame([x_hat_binary], columns=cleaned_cols)
+    # Threshold Z-scores at 3
+    x_hat_binary = (np.abs(x_hat_numeric) > 3).astype(int)
+
+    # Ensure single row output with named columns
+    recon = pd.DataFrame([x_hat_binary.flatten()], columns=feature_cols)
     recon.insert(0, 'ID', subject)
     recon.insert(1, 'Group', group.iloc[0])
     recon.to_csv(f'tests/reconstructed-features_{metric}_{title}.csv', mode='a', header=once, index=False)
