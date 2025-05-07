@@ -11,33 +11,28 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.preprocessing import  StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-from models import zscore, pca, autoencoder
 
 from matplotlib.backends.backend_agg import RendererAgg
 _lock = RendererAgg.lock
 
 class Model:
-    def __init__(self, X_train, X_test, modeltype):
-        self.x_train = X_train
-        self.x_test = X_test
-        self.modeltype = modeltype
+    def __init__(self, X_train, X_test, method):
+        self.X_train = X_train
+        self.X_test = X_test
+        self.method = method
 
-    def get_train(self):
-        return self.x_train
-    
-    def get_test(self):
-        return self.x_test
-    
-    def run(self):
-        if(self.modeltype == "Z-score"):
-            return zscore.run(self)
-        elif(self.modeltype == "PCA"):
-            return pca.run(self)
-        else:
-            return autoencoder.run(self) 
-        
     def run_once(self):
-        return autoencoder.run_once(self)
+        if self.method == "ZScore":
+            from models import zscore
+            return zscore.run_once(self)
+        elif self.method == "PCA" or self.method == "PCAModel":
+            from models import pca
+            return pca.run_once(self)
+        elif self.method == "AutoEncoder":
+            from models import autoencoder
+            return autoencoder.run_once(self)
+        else:
+            raise ValueError(f"Unknown model method: {self.method}")
 
 def plotDistribution(d_train, xlim, ylim, label, method):
     with _lock:    
