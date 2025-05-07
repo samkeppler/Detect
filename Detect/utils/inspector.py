@@ -57,7 +57,7 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     x_hat = model.run_once()
     
     #unnormalize
-    x_hat_inv = scaler.inverse_transform(x_hat)
+    x_hat_inv = x_hat  # Don't un-normalize Z-scores
     x_inv = scaler.inverse_transform(X_test)
     mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
     sub_orig = x_hat_inv - x_inv
