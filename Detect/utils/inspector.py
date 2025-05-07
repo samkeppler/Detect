@@ -57,10 +57,11 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     x_hat = model.run_once()
     
     #unnormalize
-    x_hat_inv = x_hat  # Don't un-normalize Z-scores
-    x_inv = scaler.inverse_transform(X_test)
-    mae = np.mean(np.abs(x_hat_inv-x_inv), axis = 1)
-    sub_orig = x_hat_inv - x_inv
+    x_hat_inv = x_hat  # z-scores
+    x_inv = X_test_split  # original features, just for plotting
+    mae = np.abs(x_hat_inv)  # use Z-score magnitudes as MAE
+    sub_orig = x_hat_inv  # for permutation comparison
+
     #To accumulate error Distances
     p = np.zeros(len(sub_orig[0]))
     #Then, swap patient with HC, save in a vector a new K.
