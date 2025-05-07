@@ -128,9 +128,7 @@ def main():
             out_path = f"results/{s}"
             os.makedirs(out_path, exist_ok=True)
 
-            x, x_hat, mae, p_along, p_overall, p_div = inspector.run(
-                X_train, X_test, y_test, out_path, model_type="pca"
-            )
+            inspector.run(X_train, X_test, y_test, out_path, model_type="pca", subject_id=s)
 
             cur_group = df_demog.loc[df_data['ID'] == s, 'Group']
             st.header("3. Report section")
