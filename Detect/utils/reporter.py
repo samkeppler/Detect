@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import base64
+import os
 from numpy import interp
 
 from models import zscore, pca, autoencoder
@@ -312,7 +313,18 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
         st.pyplot(plt)
 
         dfpval, dfvector = write_pval(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once)
+        save_outputs(dfpval, dfvector, metric, title)
 
         plt.close(fig)
 
     return dfpval, dfvector
+
+def save_outputs(dfpval, dfvector, metric, title):
+    pval_path = f'tests/p-val_{metric}_{title}.csv'
+    vector_path = f'tests/anomaly-vector_{metric}_{title}.csv'
+
+    # Use write mode on first save only
+    first_write = not os.path.exists(pval_path)
+
+    dfpval.to_csv(pval_path, mode='w' if first_write else 'a', header=first_write, index=False)
+    dfvector.to_csv(vector_path, mode='w' if first_write else 'a', header=first_write, index=False)
