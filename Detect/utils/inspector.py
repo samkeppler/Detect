@@ -65,16 +65,21 @@ def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     #Then, swap patient with HC, save in a vector a new K.
     #repeat for all HC, save in a matrix.
     count = 0
-    for s in y_HC['ID'].values:
-        st.write("Computing permutations (LOOCV) with", s)
-        X_train_split, y_train_split, X_test_split, y_test_split = getSubject(HC, y_HC, X, s, subject, True)
-        
-        scaler, X_train_split, X_test_split = model_prep.normalize_features(X_train_split, X_test_split, "void")
-        
-        if(regress):
-            if'sex' in df_demog and 'age' in df_demog:
-                X_train, X_test = model_prep.regress_confound(X_train_split, X_test_split, df_demog)
-        
+    # Insert subject into HC *once*, before the loop
+HC_augmented = pd.concat([HC, X.loc[X['ID'] == subject]])
+y_HC_augmented = pd.concat([y_HC, X.loc[X['ID'] == subject]][['Group', 'ID']])
+
+for s in y_HC['ID'].values:
+    st.write("Computing permutations (LOOCV) with", s)
+
+    # Now use insert=False — subject is already in HC_augmented
+    X_train_split, y_train_split, X_test_split, y_test_split = getSubject(HC_augmented, y_HC_augmented, X, s, subject, insert=False)
+
+    scaler, X_train_split, X_test_split = model_prep.normalize_features(X_train_split, X_test_split, "void")
+
+    if regress:
+        if 'sex' in df_demog and 'age' in df_demog:
+            X_train, X_test = model_prep.regress_confound(X_train_split, X_test_split, df_demog)
         
 
         #6 Run 
