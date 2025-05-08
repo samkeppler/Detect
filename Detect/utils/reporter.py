@@ -283,9 +283,14 @@ def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, gro
 
         p_along_binary = filterSpurious(p_along)
 
+        anomaly_plotted = False
         for i in range(len(p_along_binary)):
             if p_along_binary[i] == 1:
-                ax.axvline(x=i, color="#b43486", linewidth=2, alpha=0.5, linestyle="dotted")
+                if not anomaly_plotted:
+                    ax.axvline(x=i, color="#b43486", linewidth=2, alpha=0.5, linestyle="dotted", label="Anomaly")
+                    anomaly_plotted = True
+                else:
+                    ax.axvline(x=i, color="#b43486", linewidth=2, alpha=0.5, linestyle="dotted")
 
         ax.set_xlim((0, x.shape[1]))
         ax.set_ylim((0, 3 * np.mean(x)))
