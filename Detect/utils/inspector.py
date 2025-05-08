@@ -15,13 +15,14 @@ def getSubject(HC, y_HC, X, subject, original, insert=False):
     X_train_split = HC.loc[HC['ID'] != subject]
     y_train_split = y_HC.loc[y_HC['ID'] != subject]
     
-    if insert:
-        X_train_split = pd.concat([X_train_split, X.loc[X['ID'] == original]])
-        y_train_split = pd.concat([y_train_split, X_train_split[['Group', 'ID']]])
+    if insert and not (X_train_split['ID'] == original).any():
+        original_row = X.loc[X['ID'] == original]
+        X_train_split = pd.concat([X_train_split, original_row])
+        y_train_split = pd.concat([y_train_split, original_row[['Group', 'ID']]])
     
     X_test_split = X.loc[X['ID'] == subject]
     y_test_split = X_test_split[['Group', 'ID']]
-
+    
     X_train_split = X_train_split.drop(['Group', 'ID'], axis=1)
     X_test_split = X_test_split.drop(['Group', 'ID'], axis=1)
     
