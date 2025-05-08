@@ -30,89 +30,74 @@ def getSubject(HC, y_HC, X, subject, original, insert=False):
 
 def run(subject, df_data, df_demog, regress, tracts, hemi, metric):
     st.warning("Computing permutations ... estimated time: " + str(np.round(len(df_demog)*2/60,2)) + " minutes.")
+
     #1 Select features
     X = df_data.loc[:, df_data.columns.str.startswith('Group') | 
-                df_data.columns.str.startswith('ID') |
-                df_data.columns.str.contains('|'.join(tracts))]
-    
+                    df_data.columns.str.startswith('ID') |
+                    df_data.columns.str.contains('|'.join(tracts))]
+
     #Separate HC from PATIENTS
     HC = X[X['Group'] == 0]
     y_HC = HC[['Group', 'ID']]
     
     X_train_split, y_train_split, X_test_split, y_test_split = getSubject(HC, y_HC, X, subject, False)
-    
     scaler, X_train_split, X_test_split = model_prep.normalize_features(X_train_split, X_test_split, "void")
+
     #3 Linear regression of confound
-    if(regress):
-        if'sex' in df_demog and 'age' in df_demog:
-            X_train, X_test = model_prep.regress_confound(X_train_split, X_test_split, df_demog)
-        else:
-            st.error("No age or sex information found. Skipping regression step.")
-        
-
-    #6 Run 
-    #Run once to get Kreal whch is x_hat - x. 
-    model = Model(X_train, X_test, "PCAModel")
-    z = model.run_once()                         # shape (n_samples, 1)
-    mae = np.abs(z).flatten()                    # anomaly score
-    x_hat = z                                    # reassign so output remains consistent
-    x_hat_inv = np.zeros_like(X_test)            # placeholder to match expected shape
-    x_inv = X_test                               
-    sub_orig = z.T                               # shape (1, features) for sub_orig[0][e]
-
-    #To accumulate error Distances
-    p = np.zeros(len(sub_orig[0]))
-    #Then, swap patient with HC, save in a vector a new K.
-    #repeat for all HC, save in a matrix.
-    count = 0
-    # Insert subject into HC *once*, before the loop
-HC_augmented = pd.concat([HC, X.loc[X['ID'] == subject]])
-y_HC_augmented = pd.concat([y_HC, X.loc[X['ID'] == subject]][['Group', 'ID']])
-
-for s in y_HC['ID'].values:
-    st.write("Computing permutations (LOOCV) with", s)
-
-    # Now use insert=False — subject is already in HC_augmented
-    X_train_split, y_train_split, X_test_split, y_test_split = getSubject(HC_augmented, y_HC_augmented, X, s, subject, insert=False)
-
-    scaler, X_train_split, X_test_split = model_prep.normalize_features(X_train_split, X_test_split, "void")
-
     if regress:
         if 'sex' in df_demog and 'age' in df_demog:
             X_train, X_test = model_prep.regress_confound(X_train_split, X_test_split, df_demog)
-        
+        else:
+            st.error("No age or sex information found. Skipping regression step.")
+    
+    #6 Run 
+    model = Model(X_train, X_test, "PCAModel")
+    z = model.run_once()
+    mae = np.abs(z).flatten()
+    x_hat = z
+    x_hat_inv = np.zeros_like(X_test)
+    x_inv = X_test
+    sub_orig = z.T
 
-        #6 Run 
-        model = Model(X_train, X_test, "PCAModel")
-        k_hat = model.run_once()
-        #unnormalize
-        k_hat_inv = np.zeros_like(X_test)  # placeholder reconstruction
-        k_inv = scaler.inverse_transform(X_test)
-        k_mae = np.mean(np.abs(k_hat_inv-k_inv), axis = 1)
-        sub = k_hat_inv - k_inv
-        for e in range(len(sub_orig[0])):
-            #if np.abs(sub[0][e]) > np.abs(sub_orig[0][e]):
-                #p[e] = p[e] + 1
-            if sub_orig[0][e] > 0:
-                if sub[0][e] >= sub_orig[0][e]:
-                    p[e] = p[e] + 1 
-            else:
-                if sub[0][e] < sub_orig[0][e]:
-                    p[e] = p[e] + 1
-                    
-        if (np.mean(k_mae) > np.mean(mae)):
-            count = count + 1
-            
-    #Then its, p < 1/HC+Dis for each tract section.
-    p_div = len(X_train_split)+len(X_test_split)
-    overall_p = count/p_div
-    p_crit = p/p_div
-    p_along = np.zeros(len(p_crit))
+    #To accumulate error Distances
+    p = np.zeros(len(sub_orig[0]))
+    count = 0
 
-    max_p =  max(0.01,1/p_div)
-    for i in range(len(p_crit)):
-        if p_crit[i] <= max_p:
-            p_along[i] = 1
-                
-    #K could be Zscore.
+    # ✅ INSERT SUBJECT ONCE
+    HC_augmented = pd.concat([HC, X.loc[X['ID'] == subject]])
+    y_HC_augmented = pd.concat([y_HC, X.loc[X['ID'] == subject]])[['Group', 'ID']]
+
+    for s in y_HC['ID'].values:
+        st.write("Computing permutations (LOOCV) with", s)
+
+        X_train_split, y_train_split, X_test_split, y_test_split = getSubject(HC_augmented, y_HC_augmented, X, s, subject, insert=False)
+        scaler, X_train_split, X_test_split = model_prep.normalize_features(X_train_split, X_test_split, "void")
+
+        if regress:
+            if 'sex' in df_demog and 'age' in df_demog:
+                X_train, X_test = model_prep.regress_confound(X_train_split, X_test_split, df_demog)
+
+            model = Model(X_train, X_test, "PCAModel")
+            k_hat = model.run_once()
+            k_hat_inv = np.zeros_like(X_test)
+            k_inv = scaler.inverse_transform(X_test)
+            k_mae = np.mean(np.abs(k_hat_inv - k_inv), axis=1)
+            sub = k_hat_inv - k_inv
+
+            for e in range(len(sub_orig[0])):
+                if sub_orig[0][e] > 0:
+                    if sub[0][e] >= sub_orig[0][e]:
+                        p[e] += 1 
+                else:
+                    if sub[0][e] < sub_orig[0][e]:
+                        p[e] += 1
+
+            if np.mean(k_mae) > np.mean(mae):
+                count += 1
+
+    p_div = len(X_train_split) + len(X_test_split)
+    overall_p = count / p_div
+    p_crit = p / p_div
+    p_along = (p_crit <= max(0.01, 1 / p_div)).astype(int)
+
     return x_inv, x_hat_inv, mae, p_along, overall_p, p_div
