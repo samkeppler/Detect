@@ -265,6 +265,12 @@ def filterSpurious(p_along):
     return p_along_binary
     
 def plot_features(x, x_hat, mae, p_along, p_overall, p_div, subject, metric, group, title, cols, once):
+    pval_path = f"tests/p-val_{metric}_{title}.csv"
+    if os.path.exists(pval_path):
+        existing_pval = pd.read_csv(pval_path)
+        if subject in existing_pval["ID"].values:
+            return None, None
+        
     st.success("Mean Absolute Error (MAE, unscaled): " + str(np.round(np.mean(mae), 3)))
 
     if (p_overall < max(0.01, (1/p_div))):
